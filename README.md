@@ -1,8 +1,14 @@
-# Transfer.sh - Upload and Share  [![Build Status](https://travis-ci.org/kartikarora/Transfer.sh.svg?branch=master)](https://travis-ci.org/kartikarora/Transfer.sh)
+# Transfer.sh - Upload and Share
 
 Easy file sharing from the your Android device!
 
 Inspired from [transfer.sh](https://transfer.sh/) by [Dutch Coders](http://dutchcoders.io/)
+
+### Build Status
+
+|Master | Dev   |
+|-------|-------|
+|[![Build Status](https://travis-ci.org/kartikarora/Transfer.sh.svg?branch=master)](https://travis-ci.org/kartikarora/Transfer.sh)|[![Build Status](https://travis-ci.org/kartikarora/Transfer.sh.svg?branch=dev)](https://travis-ci.org/kartikarora/Transfer.sh)|
 
 
 <a href='https://play.google.com/store/apps/details?id=me.kartikarora.transfersh&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1' target='_blank'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="100" width="260"/></a>

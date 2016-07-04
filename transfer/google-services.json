@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "773737101748",
+    "project_id": "transfersh-d9215"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:773737101748:android:6214096686a79f9a",
+        "android_client_info": {
+          "package_name": "me.kartikarora.transfersh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": ""
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
