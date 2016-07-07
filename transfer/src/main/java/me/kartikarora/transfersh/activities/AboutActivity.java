@@ -65,6 +65,7 @@ public class AboutActivity extends AppCompatActivity {
         CardView aboutCardView = (CardView) findViewById(R.id.about_card);
         CardView openSourceLicensesCardView = (CardView) findViewById(R.id.open_source_licenses_card);
         CardView feedbackCardView = (CardView) findViewById(R.id.feedback_card);
+        CardView playStoreCardView = (CardView) findViewById(R.id.play_store_card);
         TextView devTextView = (TextView) findViewById(R.id.dev_text_view);
         TextView designTextView = (TextView) findViewById(R.id.design_text_view);
         TextView mwlinTextView = (TextView) findViewById(R.id.mwlin_text_view);
@@ -151,6 +152,15 @@ public class AboutActivity extends AppCompatActivity {
                 String uri = "mailto:" + Uri.encode(email) + "?subject=" + subject +
                         "&body=" + body;
                 startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(uri)));
+            }
+        });
+
+        playStoreCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String appPackageName = getPackageName();
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
             }
         });
 

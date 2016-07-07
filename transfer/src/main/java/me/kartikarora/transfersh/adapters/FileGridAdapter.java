@@ -78,7 +78,7 @@ public class FileGridAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = inflater.inflate(gridViewFlag ? R.layout.file_item : R.layout.file_list_item, parent, false);
+        View view = inflater.inflate(gridViewFlag ? R.layout.file_grid_item : R.layout.file_list_item, parent, false);
         FileItemViewHolder holder = new FileItemViewHolder(view);
         view.setTag(holder);
         return view;
