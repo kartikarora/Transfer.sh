@@ -1,4 +1,4 @@
-# Transfer.sh - Upload and Share
+# Transfer.sh - Upload and Share [![License](https://img.shields.io/badge/license-Apache%202-blue.svg?style=flat)](LICENSE.md) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/transfersh/localized.svg)](https://crowdin.com/project/transfersh)
 
 Easy file sharing from the your Android device!
 
