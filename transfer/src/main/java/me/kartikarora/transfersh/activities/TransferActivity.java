@@ -19,6 +19,7 @@ package me.kartikarora.transfersh.activities;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -31,6 +32,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -80,6 +82,9 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     private FileGridAdapter mAdapter;
     private Tracker mTracker;
     private AdView mAdView;
+    private Boolean mGridViewFlag = false;
+    private SharedPreferences mSharedPreferences = null;
+    private Cursor mData = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +116,9 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                 .setCategory("Activity : " + this.getClass().getSimpleName())
                 .setAction("Launched")
                 .build());
+
+        mSharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
+        mGridViewFlag = mSharedPreferences.getBoolean("gridFlag", false);
     }
 
     @Override
@@ -221,21 +229,8 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-        if (mAdapter != null)
-            mAdapter.swapCursor(data);
-        else
-            mAdapter = new FileGridAdapter(TransferActivity.this, data, mTracker);
-        mFileItemsGridView.setAdapter(mAdapter);
-        mAdapter.notifyDataSetChanged();
-
-        if (null != data && data.getCount() == 0) {
-            mFileItemsGridView.setVisibility(View.GONE);
-            mNoFilesTextView.setVisibility(View.VISIBLE);
-        } else {
-            mFileItemsGridView.setVisibility(View.VISIBLE);
-            mNoFilesTextView.setVisibility(View.GONE);
-        }
-
+        mData = data;
+        display(data);
     }
 
     @Override
@@ -243,6 +238,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         mFileItemsGridView.setVisibility(View.VISIBLE);
         mNoFilesTextView.setVisibility(View.GONE);
         mAdapter.swapCursor(null);
+        mData = null;
     }
 
     @Override
@@ -257,6 +253,10 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_transfer, menu);
+        if(mGridViewFlag)
+            menu.getItem(0).setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_list, null));
+        else
+            menu.getItem(0).setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_grid, null));
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -265,6 +265,44 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         if (item.getItemId() == R.id.action_about) {
             startActivity(new Intent(this, AboutActivity.class));
         }
+        if(item.getItemId() == R.id.action_view_toggle){
+            if(mGridViewFlag){
+                mGridViewFlag = false;
+                mSharedPreferences.edit().putBoolean("gridFlag",false).apply();
+                item.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_grid, null));
+                mFileItemsGridView.setNumColumns(2);
+            }
+            else {
+                mGridViewFlag = true;
+                item.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_list, null));
+                mSharedPreferences.edit().putBoolean("gridFlag",true).apply();
+                mFileItemsGridView.setNumColumns(1);
+            }
+            display(mData);
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void display(Cursor data){
+
+//        if (mAdapter != null)
+//            mAdapter.swapCursor(data);
+//        else
+            mAdapter = new FileGridAdapter(TransferActivity.this, data, mTracker, mGridViewFlag);
+        if(mGridViewFlag)
+            mFileItemsGridView.setNumColumns(2);
+        else
+            mFileItemsGridView.setNumColumns(1);
+        mFileItemsGridView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
+
+        if (null != data && data.getCount() == 0) {
+            mFileItemsGridView.setVisibility(View.GONE);
+            mNoFilesTextView.setVisibility(View.VISIBLE);
+        } else {
+            mFileItemsGridView.setVisibility(View.VISIBLE);
+            mNoFilesTextView.setVisibility(View.GONE);
+        }
+
     }
 }
