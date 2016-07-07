@@ -38,4 +38,5 @@
         <![CDATA[Made with <span style="color: #e74c3c">&hearts;</span> in India]]>
     </string>
     <string name="feedback_suggestions">Send feedback or suggestions</string>
+    <string name="view_toggle">Toggle View</string>
 </resources>

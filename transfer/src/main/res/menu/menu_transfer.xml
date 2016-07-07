@@ -14,7 +14,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_view_toggle"
+        android:title="@string/view_toggle"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_grid"/>
+    <item
         android:id="@+id/action_about"
         android:title="@string/about_app"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_info_w"/>
 </menu>
