@@ -22,6 +22,9 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 
+import org.acra.ACRA;
+import org.acra.annotation.ReportsCrashes;
+
 import me.kartikarora.transfersh.R;
 
 /**
@@ -30,12 +33,14 @@ import me.kartikarora.transfersh.R;
  * Project : ProjectSevenEight
  * Date : 30/6/16
  */
+
+@ReportsCrashes(mailTo = "chipset95@gmail.com")
 public class TransferApplication extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
-
+        ACRA.init(this);
         MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
     }
 

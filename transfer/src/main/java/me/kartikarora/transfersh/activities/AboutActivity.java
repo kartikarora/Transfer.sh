@@ -115,6 +115,12 @@ public class AboutActivity extends AppCompatActivity {
                 notice = new Notice(name, url, copyright, license);
                 notices.addNotice(notice);
 
+                name = "ACRA";
+                copyright = "Copyright 2010 Emmanuel Astier & Kevin Gaudin";
+                url = "https://github.com/ACRA/acra";
+                notice = new Notice(name, url, copyright, license);
+                notices.addNotice(notice);
+
                 name = "Apache Commons IO";
                 copyright = "Copyright 2002-2016 The Apache Software Foundation";
                 url = "http://www.apache.org/";
