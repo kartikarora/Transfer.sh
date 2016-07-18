@@ -38,6 +38,7 @@
         <![CDATA[Made with <span style="color: #e74c3c">&hearts;</span> in India]]>
     </string>
     <string name="feedback_suggestions">Send feedback or suggestions</string>
-    <string name="view_toggle">Toggle View</string>
+    <string name="view_list">View as list</string>
+    <string name="view_grid">View as grid</string>
     <string name="play_store_text">Rate and/or review on Play Store</string>
 </resources>

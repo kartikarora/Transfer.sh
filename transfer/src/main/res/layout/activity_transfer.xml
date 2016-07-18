@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
     Copyright 2016 Kartik Arora
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,35 +23,34 @@
     tools:context=".activities.TransferActivity">
 
     <RelativeLayout
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/banner_ad_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            ads:adSize="BANNER"
+            ads:adUnitId="@string/ad_unit_id" />
 
         <GridView
             android:id="@+id/file_grid_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/banner_ad_view"
+            android:layout_below="@id/banner_ad_view"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:numColumns="@integer/col_count" />
 
         <TextView
             android:id="@+id/no_files_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="@string/no_files_uploaded"
-            android:textSize="28sp"
-            android:visibility="gone" />
-
-        <com.google.android.gms.ads.AdView
-            android:id="@id/banner_ad_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/ad_unit_id" />
-
+            android:layout_centerInParent="true"
+            android:text="@string/no_files_uploaded"
+            android:visibility="gone"
+            android:textSize="28sp" />
     </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton
@@ -61,8 +59,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/activity_vertical_margin"
-        android:src="@drawable/ic_file_upload"
         app:fabSize="normal"
         app:layout_behavior=".behaviours.FABScrollAwareBehavior"
+        app:srcCompat="@drawable/ic_file_upload"
         app:useCompatPadding="true" />
 </android.support.design.widget.CoordinatorLayout>

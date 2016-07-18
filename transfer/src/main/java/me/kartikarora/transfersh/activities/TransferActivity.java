@@ -32,7 +32,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -76,13 +75,14 @@ import retrofit.mime.TypedFile;
 public class TransferActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int FILE_RESULT_CODE = BuildConfig.VERSION_CODE / 10000;
+    private static final String PREF_GRID_VIEW_FLAG = "gridFlag";
+    private boolean showAsGrid = false;
     private CoordinatorLayout mCoordinatorLayout;
     private TextView mNoFilesTextView;
     private GridView mFileItemsGridView;
     private FileGridAdapter mAdapter;
     private Tracker mTracker;
     private AdView mAdView;
-    private Boolean mGridViewFlag = false;
     private SharedPreferences mSharedPreferences = null;
     private Cursor mData = null;
 
@@ -118,7 +118,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                 .build());
 
         mSharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
-        mGridViewFlag = mSharedPreferences.getBoolean("gridFlag", false);
+        showAsGrid = mSharedPreferences.getBoolean(PREF_GRID_VIEW_FLAG, true);
     }
 
     @Override
@@ -253,10 +253,8 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_transfer, menu);
-        if(mGridViewFlag)
-            menu.getItem(0).setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_list, null));
-        else
-            menu.getItem(0).setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_grid, null));
+        menu.getItem(0).setVisible(!showAsGrid);
+        menu.getItem(1).setVisible(showAsGrid);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -264,33 +262,24 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_about) {
             startActivity(new Intent(this, AboutActivity.class));
+        } else if (item.getItemId() == R.id.action_view_grid) {
+            showAsGrid = true;
+            mSharedPreferences.edit().putBoolean(PREF_GRID_VIEW_FLAG, true).apply();
+            mFileItemsGridView.setNumColumns(getResources().getInteger(R.integer.col_count));
+        } else if (item.getItemId() == R.id.action_view_list) {
+            showAsGrid = false;
+            mSharedPreferences.edit().putBoolean(PREF_GRID_VIEW_FLAG, false).apply();
+            mFileItemsGridView.setNumColumns(1);
         }
-        if(item.getItemId() == R.id.action_view_toggle){
-            if(mGridViewFlag){
-                mGridViewFlag = false;
-                mSharedPreferences.edit().putBoolean("gridFlag",false).apply();
-                item.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_grid, null));
-                mFileItemsGridView.setNumColumns(2);
-            }
-            else {
-                mGridViewFlag = true;
-                item.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_list, null));
-                mSharedPreferences.edit().putBoolean("gridFlag",true).apply();
-                mFileItemsGridView.setNumColumns(1);
-            }
-            display(mData);
-        }
+        invalidateOptionsMenu();
+        display(mData);
         return super.onOptionsItemSelected(item);
     }
 
-    private void display(Cursor data){
-
-//        if (mAdapter != null)
-//            mAdapter.swapCursor(data);
-//        else
-            mAdapter = new FileGridAdapter(TransferActivity.this, data, mTracker, mGridViewFlag);
-        if(mGridViewFlag)
-            mFileItemsGridView.setNumColumns(2);
+    private void display(Cursor data) {
+        mAdapter = new FileGridAdapter(TransferActivity.this, data, mTracker, showAsGrid);
+        if (showAsGrid)
+            mFileItemsGridView.setNumColumns(getResources().getInteger(R.integer.col_count));
         else
             mFileItemsGridView.setNumColumns(1);
         mFileItemsGridView.setAdapter(mAdapter);

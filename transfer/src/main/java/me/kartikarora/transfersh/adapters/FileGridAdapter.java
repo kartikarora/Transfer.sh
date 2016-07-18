@@ -27,7 +27,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -99,10 +98,12 @@ public class FileGridAdapter extends CursorAdapter {
         String ext = FilenameUtils.getExtension(name);
         int identifier = context.getResources().getIdentifier("t" + ext, "drawable", context.getPackageName());
         try {
-            holder.fileTypeImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), identifier, null));
+            holder.fileTypeImageView.setImageResource(identifier);
+            // holder.fileTypeImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), identifier, null));
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
-            holder.fileTypeImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.tblank, null));
+            holder.fileTypeImageView.setImageResource(R.drawable.tblank);
+            //holder.fileTypeImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.tblank, null));
         }
 
         holder.fileInfoImageButton.setOnClickListener(new View.OnClickListener() {
