@@ -15,17 +15,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_view_grid"
-        android:icon="@drawable/selector_ic_grid"
+        android:icon="@drawable/ic_grid"
         android:title="@string/view_grid"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_view_list"
-        android:icon="@drawable/selector_ic_list"
+        android:icon="@drawable/ic_list"
         android:title="@string/view_list"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_about"
-        android:icon="@drawable/selector_ic_info_white"
+        android:icon="@drawable/ic_info_white"
         android:title="@string/about_app"
         app:showAsAction="always" />
 </menu>

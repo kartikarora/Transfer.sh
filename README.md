@@ -6,7 +6,7 @@ Inspired from [transfer.sh](https://transfer.sh/) by [Dutch Coders](http://dutch
 
 ### Build Status
 
-|Master | Dev   |
+|master | dev   |
 |-------|-------|
 |[![Build Status](https://travis-ci.org/kartikarora/Transfer.sh.svg?branch=master)](https://travis-ci.org/kartikarora/Transfer.sh)|[![Build Status](https://travis-ci.org/kartikarora/Transfer.sh.svg?branch=dev)](https://travis-ci.org/kartikarora/Transfer.sh)|
 
@@ -46,6 +46,7 @@ List of [contributors](CONTRIBUTORS.md)
 - [Retrofit](http://square.github.io/retrofit/)
 - [Apache Commons IO](http://www.apache.org/)
 - [LicensesDialog](http://psdev.de/LicensesDialog)
+- [ACRA](https://github.com/acra/acra)
 - Google Analytics, Google Admob
 - android-support-v4, android-support-v7-appcompat, android-support-design, android-support-v7-cardview
 - MimeType images designed by [Freepik](http://www.freepik.com/)
