@@ -66,7 +66,7 @@ public class FileGridAdapter extends CursorAdapter {
     public FileGridAdapter(AppCompatActivity activity, Cursor cursor, Tracker tracker, Boolean gridViewFlag) {
         super(activity.getApplicationContext(), cursor, false);
         this.context = activity.getApplicationContext();
-        this.inflater = LayoutInflater.from(context);
+        this.inflater = LayoutInflater.from(activity);
         this.activity = activity;
         this.tracker = tracker;
         this.gridViewFlag = gridViewFlag;
