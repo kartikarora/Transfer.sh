@@ -1,4 +1,4 @@
-# Transfer.sh - Upload and Share [![License](https://img.shields.io/badge/license-Apache%202-blue.svg?style=flat)](LICENSE.md) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/transfersh/localized.svg)](https://crowdin.com/project/transfersh) 
+# Transfer.sh - Upload and Share [![License](https://img.shields.io/badge/license-Apache%202-blue.svg?style=flat)](LICENSE.md) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/transfersh/localized.svg)](https://crowdin.com/project/transfersh) [![Analytics](https://ga-beacon.appspot.com/UA-79412295-2/README?pixel)](https://github.com/igrigorik/ga-beacon)
 
 Easy file sharing from the your Android device!
 

@@ -17,3 +17,5 @@ A few simple rules to be followed:
 1. Avoid tabs, four spaces should be used instead
 2. Make sure to test your changes on a physical device as well as emulator
 3. Travis-CI has been enabled, so unless it gives a `passing` build status, your PR will not be accepted
+
+[![Analytics](https://ga-beacon.appspot.com/UA-79412295-2/CONTRIBUTION?pixel)](https://github.com/igrigorik/ga-beacon)
