@@ -14,29 +14,29 @@
     limitations under the License.
 -->
 <resources>
-    <string name="app_name">Transfer.sh</string>
-    <string name="no_files_uploaded">No files uploaded</string>
-
+    <!-- Not Translated -->
+    <string name="app_name" translatable="false">Transfer.sh</string>
+    <string name="mwlin_text" translatable="false">
+        <![CDATA[Made with <span style="color: #e74c3c">&hearts;</span> in India]]>
+    </string>
     <string name="app_id" translatable="false">ca-app-pub-5469016771832930~5849475803</string>
     <string name="ad_unit_id" translatable="false">ca-app-pub-5469016771832930/6402925407</string>
+    <string name="content_authority" translatable="false">me.kartikarora.transfersh</string>
+
+    <string name="no_files_uploaded">No files uploaded</string>
     <string name="download_complete">Download Complete</string>
     <string name="uploading_file">Uploading file</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="uploaded">uploaded</string>
     <string name="report">Report</string>
-    <string name="content_authority" translatable="false">me.kartikarora.transfersh</string>
     <string name="download_file">Download this file using</string>
     <string name="permission_message">Need permission to save file locally</string>
     <string name="unable_to_read">Unable to read file</string>
     <string name="title_activity_about">About</string>
-
     <string name="about_app">About App</string>
     <string name="open_source_licenses">Open Source Licenses</string>
     <string name="dev_text">Developed and maintained by Kartik Arora</string>
     <string name="design_text">MimeType images designed by Freepik</string>
-    <string name="mwlin_text">
-        <![CDATA[Made with <span style="color: #e74c3c">&hearts;</span> in India]]>
-    </string>
     <string name="feedback_suggestions">Send feedback or suggestions</string>
     <string name="view_list">View as list</string>
     <string name="view_grid">View as grid</string>
