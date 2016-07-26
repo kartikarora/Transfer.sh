@@ -16,6 +16,7 @@
     limitations under the License.
 -->
 <resources>
+  <!-- Not Translated -->
   <string name="no_files_uploaded">No ha subido archivos</string>
   <string name="download_complete">La descarga se ha completado</string>
   <string name="uploading_file">Subiendo el archivo</string>
