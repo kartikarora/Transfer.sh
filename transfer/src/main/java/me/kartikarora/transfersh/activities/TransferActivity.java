@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
@@ -141,6 +142,25 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                 .addTestDevice("26FBB03CE9B06AD8ABBE73E092D5CCF2")
                 .build();
         mAdView.loadAd(adRequest);
+        Log.d("on", "Resume");
+        String action = getIntent().getAction();
+        if (Intent.ACTION_SEND.equals(action)) {
+            Uri dataUri = getIntent().getParcelableExtra(Intent.EXTRA_STREAM);
+            try {
+                uploadFile(dataUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+            ArrayList<Uri> dataUris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            for (Uri uri : dataUris) {
+                try {
+                    uploadFile(uri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override
@@ -187,8 +207,22 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        String result = sb.toString();
-                        Snackbar.make(mCoordinatorLayout, name + " " + getString(R.string.uploaded), Snackbar.LENGTH_SHORT).show();
+                        final String result = sb.toString();
+                        Snackbar.make(mCoordinatorLayout, name + " " + getString(R.string.uploaded), Snackbar.LENGTH_INDEFINITE)
+                                .setAction(R.string.share, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        mTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory("Action")
+                                                .setAction("Share : " + result)
+                                                .build());
+                                        startActivity(new Intent()
+                                                .setAction(Intent.ACTION_SEND)
+                                                .putExtra(Intent.EXTRA_TEXT, result)
+                                                .setType("text/plain")
+                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                                    }
+                                }).show();
 
                         ContentValues values = new ContentValues();
                         values.put(FilesContract.FilesEntry.COLUMN_NAME, name);
@@ -207,17 +241,12 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                         error.printStackTrace();
                         if (dialog.isShowing())
                             dialog.hide();
-                        Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_INDEFINITE)
-                                .setAction(R.string.report, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        // TODO add feedback code
-                                    }
-                                }).show();
+                        Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
                     }
                 });
             } else
                 Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
+            cursor.close();
         }
     }
 

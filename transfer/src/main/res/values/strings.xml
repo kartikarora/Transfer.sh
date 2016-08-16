@@ -40,4 +40,5 @@
     <string name="view_list">View as list</string>
     <string name="view_grid">View as grid</string>
     <string name="play_store_text">Rate and/or review on Play Store</string>
+    <string name="share">Share</string>
 </resources>
