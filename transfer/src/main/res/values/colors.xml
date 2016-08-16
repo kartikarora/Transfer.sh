@@ -23,4 +23,8 @@
     <color name="secondary_text">#727272</color>
     <color name="icons">#212121</color>
     <color name="divider">#B6B6B6</color>
+
+    <color name="kartik">#303F9F</color>
+    <color name="freepik">#FFFFFF</color>
+    <color name="mwlii">#FFFFFF</color>
 </resources>

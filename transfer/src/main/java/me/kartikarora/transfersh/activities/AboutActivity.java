@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.Html;
@@ -68,7 +70,7 @@ public class AboutActivity extends AppCompatActivity {
         CardView playStoreCardView = (CardView) findViewById(R.id.play_store_card);
         TextView devTextView = (TextView) findViewById(R.id.dev_text_view);
         TextView designTextView = (TextView) findViewById(R.id.design_text_view);
-        TextView mwlinTextView = (TextView) findViewById(R.id.mwlin_text_view);
+        TextView mwliiTextView = (TextView) findViewById(R.id.mwlii_text_view);
 
         aboutCardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,7 +93,7 @@ public class AboutActivity extends AppCompatActivity {
                 Notices notices = new Notices();
                 String url, name, copyright;
 
-                name = "android-support-v4, android-support-v7-appcompat, android-support-design";
+                name = "android-support-v4, android-support-v7-appcompat, android-support-design, android-support-customtabs";
                 copyright = "Copyright (C) 2015 The Android Open Source Project";
                 url = "https://source.android.com/";
                 License license = new ApacheSoftwareLicense20();
@@ -170,29 +172,34 @@ public class AboutActivity extends AppCompatActivity {
             }
         });
 
-        mwlinTextView.setText(Html.fromHtml(getString(R.string.mwlin_text)));
+        mwliiTextView.setText(Html.fromHtml(getString(R.string.mwlii_text)));
+
         devTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://kartikarora.me")));
+                launchChromeCustomTab("http://kartikarora.me", R.color.kartik);
             }
         });
 
         designTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://www.freepik.com/")));
+                launchChromeCustomTab("http://www.freepik.com/", R.color.freepik);
             }
         });
 
-        mwlinTextView.setOnClickListener(new View.OnClickListener() {
+        mwliiTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://madewithlove.org.in/")));
+                launchChromeCustomTab("http://madewithlove.org.in/", R.color.mwlii);
             }
         });
+    }
+
+    private void launchChromeCustomTab(String url, int color) {
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        builder.setToolbarColor(ContextCompat.getColor(getApplicationContext(), color));
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(this, Uri.parse(url));
     }
 }

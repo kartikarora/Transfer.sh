@@ -121,7 +121,7 @@
         android:id="@id/design_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/mwlin_text_view"
+        android:layout_above="@+id/mwlii_text_view"
         android:gravity="center"
         android:paddingBottom="@dimen/small_button"
         android:paddingEnd="@dimen/activity_vertical_margin"
@@ -131,7 +131,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@id/mwlin_text_view"
+        android:id="@id/mwlii_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

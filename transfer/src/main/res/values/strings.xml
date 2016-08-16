@@ -14,9 +14,8 @@
     limitations under the License.
 -->
 <resources>
-    <!-- Not Translated -->
     <string name="app_name" translatable="false">Transfer.sh</string>
-    <string name="mwlin_text" translatable="false">
+    <string name="mwlii_text" translatable="false">
         <![CDATA[Made with <span style="color: #e74c3c">&hearts;</span> in India]]>
     </string>
     <string name="app_id" translatable="false">ca-app-pub-5469016771832930~5849475803</string>
