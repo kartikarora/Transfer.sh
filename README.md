@@ -62,7 +62,7 @@ _Android, Google Play, and the Google Play logo are trademarks of Google Inc._
 License
 -------
 ```
-Copyright 2016 Kartik Arora
+Copyright 2017 Kartik Arora
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

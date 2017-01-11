@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Kartik Arora
+ * Copyright 2017 Kartik Arora
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ public class FilesContract {
         public static final String COLUMN_TYPE = "type";
         public static final String COLUMN_URL = "url";
         public static final String COLUMN_SIZE = "size";
+        public static final String COLUMN_DATE_UPLOAD = "date_up";
+        public static final String COLUMN_DATE_DELETE = "date_del";
 
         public static Uri buildUri(long id) {
             return ContentUris.withAppendedId(BASE_CONTENT_URI, id);

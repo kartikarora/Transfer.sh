@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Kartik Arora
+ * Copyright 2017 Kartik Arora
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,6 +132,13 @@ public class AboutActivity extends AppCompatActivity {
                 name = "transfer.sh";
                 copyright = "Copyright (c) 2014 DutchCoders [https://github.com/dutchcoders/]";
                 url = "https://github.com/dutchcoders/";
+                license = new MITLicense();
+                notice = new Notice(name, url, copyright, license);
+                notices.addNotice(notice);
+
+                name = "Potato Library";
+                copyright = "Copyright (c) 2016 Kartik Arora";
+                url = "http://kartikarora.me/Potato-Library";
                 license = new MITLicense();
                 notice = new Notice(name, url, copyright, license);
                 notices.addNotice(notice);

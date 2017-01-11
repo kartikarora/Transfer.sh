@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Kartik Arora
+ * Copyright 2017 Kartik Arora
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
@@ -140,9 +144,9 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         super.onResume();
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice("26FBB03CE9B06AD8ABBE73E092D5CCF2")
+                .addTestDevice("BBF593830D9E694FF82AC14E7C36717B")
                 .build();
         mAdView.loadAd(adRequest);
-        Log.d("on", "Resume");
         String action = getIntent().getAction();
         if (Intent.ACTION_SEND.equals(action)) {
             Uri dataUri = getIntent().getParcelableExtra(Intent.EXTRA_STREAM);
@@ -224,11 +228,20 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                                     }
                                 }).show();
 
+
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                        Calendar upCal = Calendar.getInstance();
+                        upCal.setTime(new Date(file.lastModified()));
+                        Calendar delCal = Calendar.getInstance();
+                        delCal.setTime(upCal.getTime());
+                        delCal.add(Calendar.DATE, 14);
                         ContentValues values = new ContentValues();
                         values.put(FilesContract.FilesEntry.COLUMN_NAME, name);
                         values.put(FilesContract.FilesEntry.COLUMN_TYPE, mimeType);
                         values.put(FilesContract.FilesEntry.COLUMN_URL, result);
                         values.put(FilesContract.FilesEntry.COLUMN_SIZE, String.valueOf(file.getTotalSpace()));
+                        values.put(FilesContract.FilesEntry.COLUMN_DATE_UPLOAD, sdf.format(upCal.getTime()));
+                        values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
                         getContentResolver().insert(FilesContract.BASE_CONTENT_URI, values);
                         getSupportLoaderManager().restartLoader(BuildConfig.VERSION_CODE, null, TransferActivity.this);
                         FileUtils.deleteQuietly(file);

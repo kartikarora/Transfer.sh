@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-    Copyright 2016 Kartik Arora
+    Copyright 2017 Kartik Arora
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -41,4 +41,5 @@
     <string name="view_grid">View as grid</string>
     <string name="play_store_text">Rate and/or review on Play Store</string>
     <string name="share">Share</string>
+    <string name="mimetype_image">Mimetype Image</string>
 </resources>

@@ -3,8 +3,8 @@ jdk: oraclejdk8
 android:
     components:
         - tools
-        - build-tools-24.0.1
-        - android-24
+        - build-tools-25.0.2
+        - android-25
         - platform-tools
         - extra-android-support
         - extra-android-m2repository
@@ -14,11 +14,11 @@ android:
         - 'android-sdk-license-.+'
 env:
     matrix:
-        - ANDROID_TARGET=android-19
         - ANDROID_TARGET=android-20
         - ANDROID_TARGET=android-21
         - ANDROID_TARGET=android-22
         - ANDROID_TARGET=android-23
         - ANDROID_TARGET=android-24
+        - ANDROID_TARGET=android-25
 before_script:
     - chmod +x gradlew

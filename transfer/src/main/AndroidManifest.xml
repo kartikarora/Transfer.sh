@@ -19,34 +19,39 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name="me.kartikarora.transfersh.applications.TransferApplication"
+        android:name=".applications.TransferApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="me.kartikarora.transfersh.activities.TransferActivity"
+            android:name=".activities.TransferActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="*/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
-
-        <activity android:name="me.kartikarora.transfersh.activities.DownloadActivity">
+        <activity android:name=".activities.DownloadActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -72,25 +77,36 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="me.kartikarora.transfersh.activities.AboutActivity"
+            android:name=".activities.AboutActivity"
             android:label="@string/title_activity_about"
-            android:parentActivityName="me.kartikarora.transfersh.activities.TransferActivity">
+            android:parentActivityName=".activities.TransferActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.TransferActivity" />
         </activity>
 
         <provider
-            android:name="me.kartikarora.transfersh.providers.FilesProvider"
+            android:name=".providers.FilesProvider"
             android:authorities="me.kartikarora.transfersh"
             android:exported="false"
             android:syncable="true" />
 
-        <receiver android:name="me.kartikarora.transfersh.receivers.DownloadCompleteBroadcastReceiver">
+        <receiver android:name=".receivers.DownloadCompleteBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".receivers.">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".services.CheckAndNotifyOrDeleteService"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>
