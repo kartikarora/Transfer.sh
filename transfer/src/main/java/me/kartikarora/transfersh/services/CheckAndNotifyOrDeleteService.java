@@ -19,6 +19,7 @@ package me.kartikarora.transfersh.services;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 /**
  * Developer: chipset
@@ -28,11 +29,15 @@ import android.os.IBinder;
  */
 
 public class CheckAndNotifyOrDeleteService extends Service {
-    public CheckAndNotifyOrDeleteService() {
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("Job Ran", "This Service");
+        return START_NOT_STICKY;
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return null;
     }
 }

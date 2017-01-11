@@ -17,7 +17,11 @@
 package me.kartikarora.transfersh.activities;
 
 import android.app.ProgressDialog;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -66,6 +70,7 @@ import me.kartikarora.transfersh.adapters.FileGridAdapter;
 import me.kartikarora.transfersh.applications.TransferApplication;
 import me.kartikarora.transfersh.contracts.FilesContract;
 import me.kartikarora.transfersh.network.TransferClient;
+import me.kartikarora.transfersh.services.ScheduledJobService;
 import retrofit.ResponseCallback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -111,6 +116,18 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                     startActivityForResult(intent, FILE_RESULT_CODE);
                 }
             });
+        }
+
+        ComponentName componentName = new ComponentName(TransferActivity.this, ScheduledJobService.class);
+        JobInfo.Builder builder = new JobInfo.Builder(BuildConfig.VERSION_CODE / 10000, componentName)
+                .setRequiresCharging(false)
+                .setRequiresDeviceIdle(false)
+                .setPeriodic(24 * 60 * 60 * 1000);
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (jobScheduler.schedule(builder.build()) == JobScheduler.RESULT_FAILURE) {
+            Log.e("Transfer.sh", "Job Initiation Failed");
+        } else {
+            Log.i("Transfer.sh", "Job Initiated");
         }
 
         getSupportLoaderManager().initLoader(BuildConfig.VERSION_CODE, null, this);
