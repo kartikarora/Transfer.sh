@@ -26,6 +26,7 @@ import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
 
 import me.kartikarora.transfersh.R;
+import me.kartikarora.transfersh.helpers.UtilsHelper;
 
 /**
  * Developer: chipset
@@ -42,6 +43,7 @@ public class TransferApplication extends Application {
         super.onCreate();
         ACRA.init(this);
         MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
+        UtilsHelper.getInstance().scheduleServiceJob(TransferApplication.this);
     }
 
     private Tracker mTracker;

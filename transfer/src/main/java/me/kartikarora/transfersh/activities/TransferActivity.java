@@ -17,11 +17,7 @@
 package me.kartikarora.transfersh.activities;
 
 import android.app.ProgressDialog;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -37,7 +33,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -62,15 +57,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.adapters.FileGridAdapter;
 import me.kartikarora.transfersh.applications.TransferApplication;
 import me.kartikarora.transfersh.contracts.FilesContract;
+import me.kartikarora.transfersh.helpers.UtilsHelper;
 import me.kartikarora.transfersh.network.TransferClient;
-import me.kartikarora.transfersh.services.ScheduledJobService;
 import retrofit.ResponseCallback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -118,18 +112,6 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             });
         }
 
-        ComponentName componentName = new ComponentName(TransferActivity.this, ScheduledJobService.class);
-        JobInfo.Builder builder = new JobInfo.Builder(BuildConfig.VERSION_CODE / 10000, componentName)
-                .setRequiresCharging(false)
-                .setRequiresDeviceIdle(false)
-                .setPeriodic(24 * 60 * 60 * 1000);
-        JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        if (jobScheduler.schedule(builder.build()) == JobScheduler.RESULT_FAILURE) {
-            Log.e("Transfer.sh", "Job Initiation Failed");
-        } else {
-            Log.i("Transfer.sh", "Job Initiated");
-        }
-
         getSupportLoaderManager().initLoader(BuildConfig.VERSION_CODE, null, this);
         TransferApplication application = (TransferApplication) getApplication();
         mTracker = application.getDefaultTracker();
@@ -147,7 +129,6 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILE_RESULT_CODE && resultCode == RESULT_OK) {
-            Log.d("URI", data.getData().getPath());
             try {
                 uploadFile(data.getData());
             } catch (IOException e) {
@@ -201,9 +182,6 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
             final String name = cursor.getString(nameIndex);
             final String mimeType = getContentResolver().getType(uri);
-            Log.d(this.getClass().getSimpleName(), cursor.getString(0));
-            Log.d(this.getClass().getSimpleName(), name);
-            Log.d(this.getClass().getSimpleName(), mimeType);
             InputStream inputStream = getContentResolver().openInputStream(uri);
             OutputStream outputStream = openFileOutput(name, MODE_PRIVATE);
             if (inputStream != null) {
@@ -245,8 +223,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                                     }
                                 }).show();
 
-
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                        SimpleDateFormat sdf = UtilsHelper.getInstance().getSdf();
                         Calendar upCal = Calendar.getInstance();
                         upCal.setTime(new Date(file.lastModified()));
                         Calendar delCal = Calendar.getInstance();

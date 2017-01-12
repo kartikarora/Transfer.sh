@@ -97,7 +97,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".receivers.BootCompleteReceiver">
+        <receiver android:name=".receivers.BootCompleteBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

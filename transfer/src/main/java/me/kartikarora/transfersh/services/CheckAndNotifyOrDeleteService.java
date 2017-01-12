@@ -16,10 +16,24 @@
 
 package me.kartikarora.transfersh.services;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.IBinder;
-import android.util.Log;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
+
+import chipset.potato.Potato;
+import me.kartikarora.transfersh.R;
+import me.kartikarora.transfersh.activities.TransferActivity;
+import me.kartikarora.transfersh.contracts.FilesContract;
+import me.kartikarora.transfersh.helpers.UtilsHelper;
 
 /**
  * Developer: chipset
@@ -32,7 +46,45 @@ public class CheckAndNotifyOrDeleteService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("Job Ran", "This Service");
+        Cursor cursor = getContentResolver().query(FilesContract.BASE_CONTENT_URI, new String[]{
+                FilesContract.FilesEntry._ID, FilesContract.FilesEntry.COLUMN_NAME,
+                FilesContract.FilesEntry.COLUMN_DATE_DELETE}, null, null, null);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String dateDelete = cursor.getString(cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_DATE_DELETE));
+                String name = cursor.getString(cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_NAME));
+                long id = cursor.getLong(cursor.getColumnIndex(FilesContract.FilesEntry._ID));
+                SimpleDateFormat sdf = UtilsHelper.getInstance().getSdf();
+                Calendar today = Calendar.getInstance();
+                Calendar delDate = Calendar.getInstance();
+                try {
+                    delDate.setTime(sdf.parse(dateDelete));
+                    long todayMillis = today.getTimeInMillis();
+                    long delDateMillis = delDate.getTimeInMillis();
+                    long days = TimeUnit.MILLISECONDS.toDays(Math.abs(delDateMillis - todayMillis));
+                    if (days == 3) {
+                        Potato.potate(getApplicationContext()).Notifications().showNotificationDefaultSound("Transfer.sh",
+                                "Your uploaded file " + name + " is due for deletion in 3 days",
+                                R.mipmap.ic_launcher, new Intent(getApplicationContext(), TransferActivity.class));
+                    } else if (days == 1) {
+                        Notification notification = new NotificationCompat.Builder(getApplicationContext())
+                                .setContentTitle("Transfer.sh")
+                                .setContentText("Your uploaded file " + name + " is due for deletion tomorrow")
+                                .build();
+                        NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(getApplicationContext());
+                        mNotifyMgr.cancelAll();
+                        mNotifyMgr.notify(0, notification);
+                    } else if (days == 0) {
+                        // TODO: Add db removal code here
+                        /*getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
+                                new String[]{String.valueOf(id)});*/
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            cursor.close();
+        }
         return START_NOT_STICKY;
     }
 
