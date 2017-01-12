@@ -122,7 +122,6 @@ public class DownloadActivity extends AppCompatActivity {
     }
 
     private void checkForDownload(String name, String type, String url, View view) {
-
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
             beginDownload(name, type, url);
         else {
@@ -130,7 +129,6 @@ public class DownloadActivity extends AppCompatActivity {
                 showRationale(view);
             else {
                 showPermissionDialog();
-                checkForDownload(name, type, url, view);
             }
         }
     }
