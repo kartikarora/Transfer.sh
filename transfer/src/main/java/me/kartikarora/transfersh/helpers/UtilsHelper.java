@@ -38,7 +38,7 @@ public class UtilsHelper {
         JobInfo.Builder builder = new JobInfo.Builder(BuildConfig.VERSION_CODE / 10000, componentName)
                 .setRequiresCharging(false)
                 .setRequiresDeviceIdle(false)
-                .setPeriodic(2 * 60 * 1000);
+                .setPeriodic(24 * 60 * 60 * 1000);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         if (jobScheduler.schedule(builder.build()) == JobScheduler.RESULT_FAILURE) {
             Log.e("Transfer.sh", "Job Initiation Failed");

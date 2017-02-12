@@ -29,17 +29,21 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/file_item_type_image_view"
+        <TextView
+            android:id="@+id/file_item_type_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:background="@drawable/file"
+            android:gravity="center"
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:paddingEnd="@dimen/activity_horizontal_margin"
             android:paddingStart="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:scaleType="fitCenter"
-            tools:src="@drawable/ttxt" />
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            tools:text="BLANK" />
 
         <TextView
             android:id="@+id/file_item_name_text_view"
@@ -81,9 +85,9 @@
                 android:id="@+id/file_item_download_image_button"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"
-                android:background="?attr/selectableItemBackground"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
                 app:srcCompat="@drawable/ic_download" />
         </LinearLayout>
     </LinearLayout>

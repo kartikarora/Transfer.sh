@@ -21,7 +21,6 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
@@ -34,7 +33,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.analytics.HitBuilders;
@@ -96,15 +94,7 @@ public class FileGridAdapter extends CursorAdapter {
         final String url = cursor.getString(urlCol);
         holder.fileNameTextView.setText(name);
         String ext = FilenameUtils.getExtension(name);
-        int identifier = context.getResources().getIdentifier("t" + ext, "drawable", context.getPackageName());
-        try {
-            holder.fileTypeImageView.setImageResource(identifier);
-            // holder.fileTypeImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), identifier, null));
-        } catch (Resources.NotFoundException e) {
-            e.printStackTrace();
-            holder.fileTypeImageView.setImageResource(R.drawable.tblank);
-            //holder.fileTypeImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.tblank, null));
-        }
+        holder.fileTypeImageView.setText(ext.toUpperCase());
 
         holder.fileInfoImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,14 +135,14 @@ public class FileGridAdapter extends CursorAdapter {
     private class FileItemViewHolder {
 
         private TextView fileNameTextView;
-        private ImageView fileTypeImageView;
+        private TextView fileTypeImageView;
         private ImageButton fileInfoImageButton;
         private ImageButton fileShareImageButton;
         private ImageButton fileDownloadImageButton;
 
         public FileItemViewHolder(View view) {
             fileNameTextView = (TextView) view.findViewById(R.id.file_item_name_text_view);
-            fileTypeImageView = (ImageView) view.findViewById(R.id.file_item_type_image_view);
+            fileTypeImageView = (TextView) view.findViewById(R.id.file_item_type_text_view);
             fileInfoImageButton = (ImageButton) view.findViewById(R.id.file_item_info_image_button);
             fileShareImageButton = (ImageButton) view.findViewById(R.id.file_item_share_image_button);
             fileDownloadImageButton = (ImageButton) view.findViewById(R.id.file_item_download_image_button);

@@ -18,8 +18,8 @@
     <string name="mwlii_text" translatable="false">
         <![CDATA[Made with <span style="color: #e74c3c">&hearts;</span> in India]]>
     </string>
-    <string name="app_id" translatable="false">ca-app-pub-5469016771832930~5849475803</string>
-    <string name="ad_unit_id" translatable="false">ca-app-pub-5469016771832930/6402925407</string>
+    <string name="app_id" translatable="false">ca-app-pub-5219660827342005~8629242571</string>
+    <string name="ad_unit_id" translatable="false">ca-app-pub-5219660827342005/1105975776</string>
     <string name="content_authority" translatable="false">me.kartikarora.transfersh</string>
 
     <string name="no_files_uploaded">No files uploaded</string>

@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,6 +44,7 @@ import me.kartikarora.transfersh.helpers.UtilsHelper;
  */
 
 public class CheckAndNotifyOrDeleteService extends Service {
+    private static final String TAG = CheckAndNotifyOrDeleteService.class.getName();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -62,22 +64,23 @@ public class CheckAndNotifyOrDeleteService extends Service {
                     long todayMillis = today.getTimeInMillis();
                     long delDateMillis = delDate.getTimeInMillis();
                     long days = TimeUnit.MILLISECONDS.toDays(Math.abs(delDateMillis - todayMillis));
+                    Log.i(TAG, days + "");
                     if (days == 3) {
                         Potato.potate(getApplicationContext()).Notifications().showNotificationDefaultSound("Transfer.sh",
-                                "Your uploaded file " + name + " is due for deletion in 3 days",
+                                "Your uploaded file " + name + " is scheduled for deletion in 3 days",
                                 R.mipmap.ic_launcher, new Intent(getApplicationContext(), TransferActivity.class));
                     } else if (days == 1) {
                         Notification notification = new NotificationCompat.Builder(getApplicationContext())
                                 .setContentTitle("Transfer.sh")
                                 .setContentText("Your uploaded file " + name + " is due for deletion tomorrow")
+                                .addAction(R.drawable.ic_upload, "RE-UPLOAD", null)
                                 .build();
                         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(getApplicationContext());
                         mNotifyMgr.cancelAll();
                         mNotifyMgr.notify(0, notification);
                     } else if (days == 0) {
-                        // TODO: Add db removal code here
-                        /*getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
-                                new String[]{String.valueOf(id)});*/
+                        getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
+                                new String[]{String.valueOf(id)});
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();

@@ -70,6 +70,8 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.mime.TypedFile;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Developer: chipset
  * Package : me.kartikarora.transfersh.activities
@@ -141,8 +143,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     protected void onResume() {
         super.onResume();
         AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("26FBB03CE9B06AD8ABBE73E092D5CCF2")
-                .addTestDevice("BBF593830D9E694FF82AC14E7C36717B")
+                .addTestDevice("2F50AAA33A5225F171002E20B341E95D")
                 .build();
         mAdView.loadAd(adRequest);
         String action = getIntent().getAction();
