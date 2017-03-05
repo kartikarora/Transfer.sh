@@ -169,6 +169,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                             uploadFile(uri);
                             getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
                                     new String[]{String.valueOf(id)});
+                            mAdapter.notifyDataSetChanged();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -249,7 +250,6 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                         values.put(FilesContract.FilesEntry.COLUMN_DATE_UPLOAD, sdf.format(upCal.getTime()));
                         values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
                         getContentResolver().insert(FilesContract.BASE_CONTENT_URI, values);
-                        getSupportLoaderManager().restartLoader(BuildConfig.VERSION_CODE, null, TransferActivity.this);
                         FileUtils.deleteQuietly(file);
                         if (dialog.isShowing())
                             dialog.hide();
@@ -329,12 +329,12 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
     private void display(Cursor data) {
         mAdapter = new FileGridAdapter(TransferActivity.this, data, mFirebaseAnalytics, showAsGrid);
-        if (showAsGrid)
+        if (showAsGrid) {
             mFileItemsGridView.setNumColumns(getResources().getInteger(R.integer.col_count));
-        else
+        } else {
             mFileItemsGridView.setNumColumns(1);
+        }
         mFileItemsGridView.setAdapter(mAdapter);
-        mAdapter.notifyDataSetChanged();
 
         if (null != data && data.getCount() == 0) {
             mFileItemsGridView.setVisibility(View.GONE);
@@ -343,6 +343,5 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             mFileItemsGridView.setVisibility(View.VISIBLE);
             mNoFilesTextView.setVisibility(View.GONE);
         }
-
     }
 }

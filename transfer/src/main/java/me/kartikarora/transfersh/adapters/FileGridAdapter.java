@@ -19,6 +19,7 @@ package me.kartikarora.transfersh.adapters;
 import android.Manifest;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -82,12 +83,14 @@ public class FileGridAdapter extends CursorAdapter {
     }
 
     @Override
-    public void bindView(View view, final Context context, Cursor cursor) {
-        FileItemViewHolder holder = (FileItemViewHolder) view.getTag();
+    public void bindView(final View view, final Context context, Cursor cursor) {
+        final FileItemViewHolder holder = (FileItemViewHolder) view.getTag();
+        final int idCol = cursor.getColumnIndex(FilesContract.FilesEntry._ID);
         int nameCol = cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_NAME);
         int typeCol = cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_TYPE);
         int sizeCol = cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_SIZE);
         int urlCol = cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_URL);
+        final long id = cursor.getLong(idCol);
         final String name = cursor.getString(nameCol);
         final String type = cursor.getString(typeCol);
         final String size = cursor.getString(sizeCol);
@@ -126,6 +129,24 @@ public class FileGridAdapter extends CursorAdapter {
             @Override
             public void onClick(View view) {
                 checkForDownload(name, type, url, view);
+            }
+        });
+
+        view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                new AlertDialog.Builder(activity)
+                        .setMessage("Delete file " + name + " ?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                context.getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?", new String[]{String.valueOf(id)});
+                                Snackbar.make(view, "Deleted file " + name, Snackbar.LENGTH_SHORT).show();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null)
+                        .create().show();
+                return true;
             }
         });
     }

@@ -46,7 +46,9 @@ public class FilesProvider extends ContentProvider {
 
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return mReadableDatabase.query(FilesContract.FilesEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+        Cursor cursor = mReadableDatabase.query(FilesContract.FilesEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
     }
 
     @Override
@@ -60,6 +62,7 @@ public class FilesProvider extends ContentProvider {
         long _id = mWritableDatabase.insert(FilesContract.FilesEntry.TABLE_NAME, null, values);
         if (_id > 0) {
             returnUri = FilesContract.FilesEntry.buildUri(_id);
+            getContext().getContentResolver().notifyChange(FilesContract.BASE_CONTENT_URI, null);
         } else
             throw new android.database.SQLException("Failed to insert row into " + uri);
         return returnUri;
@@ -67,11 +70,13 @@ public class FilesProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
+        getContext().getContentResolver().notifyChange(FilesContract.BASE_CONTENT_URI, null);
         return mWritableDatabase.delete(FilesContract.FilesEntry.TABLE_NAME, selection, selectionArgs);
     }
 
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        getContext().getContentResolver().notifyChange(FilesContract.BASE_CONTENT_URI, null);
         return mWritableDatabase.update(FilesContract.FilesEntry.TABLE_NAME, values, selection,
                 selectionArgs);
     }

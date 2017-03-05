@@ -25,6 +25,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
 
+import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.helpers.UtilsHelper;
 
@@ -41,7 +42,9 @@ public class TransferApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        ACRA.init(this);
+        if (!BuildConfig.DEBUG) {
+            ACRA.init(this);
+        }
         MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
         UtilsHelper.getInstance().scheduleServiceJob(TransferApplication.this);
         Stetho.initializeWithDefaults(this);
