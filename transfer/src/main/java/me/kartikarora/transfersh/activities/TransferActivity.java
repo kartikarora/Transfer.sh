@@ -41,8 +41,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -60,6 +59,7 @@ import java.util.Date;
 
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
+import me.kartikarora.transfersh.actions.IntentAction;
 import me.kartikarora.transfersh.adapters.FileGridAdapter;
 import me.kartikarora.transfersh.applications.TransferApplication;
 import me.kartikarora.transfersh.contracts.FilesContract;
@@ -69,8 +69,6 @@ import retrofit.ResponseCallback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.mime.TypedFile;
-
-import static android.app.Activity.RESULT_OK;
 
 /**
  * Developer: chipset
@@ -87,7 +85,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     private TextView mNoFilesTextView;
     private GridView mFileItemsGridView;
     private FileGridAdapter mAdapter;
-    private Tracker mTracker;
+    private FirebaseAnalytics mFirebaseAnalytics;
     private AdView mAdView;
     private SharedPreferences mSharedPreferences = null;
     private Cursor mData = null;
@@ -116,12 +114,9 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
         getSupportLoaderManager().initLoader(BuildConfig.VERSION_CODE, null, this);
         TransferApplication application = (TransferApplication) getApplication();
-        mTracker = application.getDefaultTracker();
+        mFirebaseAnalytics = application.getDefaultTracker();
 
-        mTracker.send(new HitBuilders.EventBuilder()
-                .setCategory("Activity : " + this.getClass().getSimpleName())
-                .setAction("Launched")
-                .build());
+        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Activity : " + this.getClass().getSimpleName(), "Launched");
 
         mSharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
         showAsGrid = mSharedPreferences.getBoolean(PREF_GRID_VIEW_FLAG, true);
@@ -163,6 +158,24 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                     e.printStackTrace();
                 }
             }
+        } else if (IntentAction.ACTION_REUPLOAD.equals(action)) {
+            long id = getIntent().getLongExtra("file_id", -1);
+            if (id != -1) {
+                Cursor cursor = getContentResolver().query(FilesContract.BASE_CONTENT_URI, null, FilesContract.FilesEntry._ID + "=?", new String[]{String.valueOf(id)}, null);
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        Uri uri = Uri.parse(getString(cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_URI)));
+                        try {
+                            uploadFile(uri);
+                            getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
+                                    new String[]{String.valueOf(id)});
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    cursor.close();
+                }
+            }
         }
     }
 
@@ -172,7 +185,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
     }
 
-    private void uploadFile(Uri uri) throws IOException {
+    private void uploadFile(final Uri uri) throws IOException {
         final ProgressDialog dialog = new ProgressDialog(TransferActivity.this);
         dialog.setMessage(getString(R.string.uploading_file));
         dialog.setCancelable(false);
@@ -212,10 +225,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                                 .setAction(R.string.share, new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
-                                        mTracker.send(new HitBuilders.EventBuilder()
-                                                .setCategory("Action")
-                                                .setAction("Share : " + result)
-                                                .build());
+                                        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Share : " + result);
                                         startActivity(new Intent()
                                                 .setAction(Intent.ACTION_SEND)
                                                 .putExtra(Intent.EXTRA_TEXT, result)
@@ -234,6 +244,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                         values.put(FilesContract.FilesEntry.COLUMN_NAME, name);
                         values.put(FilesContract.FilesEntry.COLUMN_TYPE, mimeType);
                         values.put(FilesContract.FilesEntry.COLUMN_URL, result);
+                        values.put(FilesContract.FilesEntry.COLUMN_URI, uri.toString());
                         values.put(FilesContract.FilesEntry.COLUMN_SIZE, String.valueOf(file.getTotalSpace()));
                         values.put(FilesContract.FilesEntry.COLUMN_DATE_UPLOAD, sdf.format(upCal.getTime()));
                         values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
@@ -252,9 +263,12 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                         Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
                     }
                 });
-            } else
+            } else {
                 Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
+            }
             cursor.close();
+        } else {
+            Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -314,7 +328,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     }
 
     private void display(Cursor data) {
-        mAdapter = new FileGridAdapter(TransferActivity.this, data, mTracker, showAsGrid);
+        mAdapter = new FileGridAdapter(TransferActivity.this, data, mFirebaseAnalytics, showAsGrid);
         if (showAsGrid)
             mFileItemsGridView.setNumColumns(getResources().getInteger(R.integer.col_count));
         else

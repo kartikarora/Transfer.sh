@@ -35,14 +35,14 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.apache.commons.io.FilenameUtils;
 
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.contracts.FilesContract;
+import me.kartikarora.transfersh.helpers.UtilsHelper;
 
 /**
  * Developer: chipset
@@ -57,15 +57,15 @@ public class FileGridAdapter extends CursorAdapter {
     private AppCompatActivity activity;
     private Context context;
     private PermissionRequestResult permissionRequestResult;
-    private Tracker tracker;
+    private FirebaseAnalytics mFirebaseAnalytics;
     private Boolean gridViewFlag;
 
-    public FileGridAdapter(AppCompatActivity activity, Cursor cursor, Tracker tracker, Boolean gridViewFlag) {
+    public FileGridAdapter(AppCompatActivity activity, Cursor cursor, FirebaseAnalytics firebaseAnalytics, Boolean gridViewFlag) {
         super(activity.getApplicationContext(), cursor, false);
         this.context = activity.getApplicationContext();
         this.inflater = LayoutInflater.from(activity);
         this.activity = activity;
-        this.tracker = tracker;
+        this.mFirebaseAnalytics = firebaseAnalytics;
         this.gridViewFlag = gridViewFlag;
     }
 
@@ -112,10 +112,8 @@ public class FileGridAdapter extends CursorAdapter {
         holder.fileShareImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                tracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("Action")
-                        .setAction("Share : " + url)
-                        .build());
+                UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Share : " + url);
+
                 context.startActivity(new Intent()
                         .setAction(Intent.ACTION_SEND)
                         .putExtra(Intent.EXTRA_TEXT, url)
@@ -150,10 +148,8 @@ public class FileGridAdapter extends CursorAdapter {
     }
 
     private void beginDownload(String name, String type, String url) {
-        tracker.send(new HitBuilders.EventBuilder()
-                .setCategory("Action")
-                .setAction("Download : " + url)
-                .build());
+        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Download : " + url);
+
         DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         Uri uri = Uri.parse(url);
         DownloadManager.Request request = new DownloadManager.Request(uri);

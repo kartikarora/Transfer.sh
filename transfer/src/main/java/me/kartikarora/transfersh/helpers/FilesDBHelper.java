@@ -46,6 +46,7 @@ public class FilesDBHelper extends SQLiteOpenHelper {
                 FilesContract.FilesEntry.COLUMN_NAME + " TEXT NOT NULL, " +
                 FilesContract.FilesEntry.COLUMN_TYPE + " TEXT NOT NULL, " +
                 FilesContract.FilesEntry.COLUMN_URL + " TEXT NOT NULL, " +
+                FilesContract.FilesEntry.COLUMN_URI + " TEXT NOT NULL, " +
                 FilesContract.FilesEntry.COLUMN_SIZE + " TEXT NOT NULL, " +
                 FilesContract.FilesEntry.COLUMN_DATE_UPLOAD + " TEXT NOT NULL, " +
                 FilesContract.FilesEntry.COLUMN_DATE_DELETE + " TEXT NOT NULL);";

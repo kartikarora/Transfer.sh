@@ -17,6 +17,7 @@
 package me.kartikarora.transfersh.services;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.database.Cursor;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import chipset.potato.Potato;
 import me.kartikarora.transfersh.R;
+import me.kartikarora.transfersh.actions.IntentAction;
 import me.kartikarora.transfersh.activities.TransferActivity;
 import me.kartikarora.transfersh.contracts.FilesContract;
 import me.kartikarora.transfersh.helpers.UtilsHelper;
@@ -70,10 +72,14 @@ public class CheckAndNotifyOrDeleteService extends Service {
                                 "Your uploaded file " + name + " is scheduled for deletion in 3 days",
                                 R.mipmap.ic_launcher, new Intent(getApplicationContext(), TransferActivity.class));
                     } else if (days == 1) {
+                        Intent reuploadIntent = new Intent(this, TransferActivity.class);
+                        reuploadIntent.setAction(IntentAction.ACTION_REUPLOAD);
+                        reuploadIntent.putExtra("file_id", id);
+                        PendingIntent reuploadPendingIntent = PendingIntent.getActivity(this, 0, reuploadIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                         Notification notification = new NotificationCompat.Builder(getApplicationContext())
                                 .setContentTitle("Transfer.sh")
                                 .setContentText("Your uploaded file " + name + " is due for deletion tomorrow")
-                                .addAction(R.drawable.ic_upload, "RE-UPLOAD", null)
+                                .addAction(R.drawable.ic_upload, "RE UPLOAD", reuploadPendingIntent)
                                 .build();
                         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(getApplicationContext());
                         mNotifyMgr.cancelAll();

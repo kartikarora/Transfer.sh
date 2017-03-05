@@ -34,8 +34,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -43,6 +42,7 @@ import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.adapters.FileGridAdapter;
 import me.kartikarora.transfersh.applications.TransferApplication;
+import me.kartikarora.transfersh.helpers.UtilsHelper;
 
 /**
  * Developer: chipset
@@ -52,7 +52,7 @@ import me.kartikarora.transfersh.applications.TransferApplication;
  */
 public class DownloadActivity extends AppCompatActivity {
     private static final int PERM_REQUEST_CODE = BuildConfig.VERSION_CODE / 10000;
-    private Tracker mTracker;
+    private FirebaseAnalytics mFirebaseAnalytics;
     private String name, type, url;
 
     @Override
@@ -66,7 +66,7 @@ public class DownloadActivity extends AppCompatActivity {
         name = FilenameUtils.getName(url);
         type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url));
         TransferApplication application = (TransferApplication) getApplication();
-        mTracker = application.getDefaultTracker();
+        mFirebaseAnalytics = application.getDefaultTracker();
 
         new AlertDialog.Builder(DownloadActivity.this)
                 .setMessage(getString(R.string.download_file) + " " + getString(R.string.app_name) + "?")
@@ -85,18 +85,14 @@ public class DownloadActivity extends AppCompatActivity {
                 })
                 .create().show();
 
-        mTracker.send(new HitBuilders.EventBuilder()
-                .setCategory("Activity : " + this.getClass().getSimpleName())
-                .setAction("Launched")
-                .build());
+        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Activity : " + this.getClass().getSimpleName(), "Launched");
+
 
     }
 
     private void beginDownload(String name, String type, String url) {
-        mTracker.send(new HitBuilders.EventBuilder()
-                .setCategory("Action")
-                .setAction("Download : " + url)
-                .build());
+        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Download : " + url);
+
         DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         Uri uri = Uri.parse(url);
         DownloadManager.Request request = new DownloadManager.Request(uri);

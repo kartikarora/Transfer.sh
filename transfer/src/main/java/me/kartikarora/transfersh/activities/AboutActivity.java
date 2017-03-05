@@ -29,8 +29,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.licenses.ApacheSoftwareLicense20;
@@ -41,6 +40,7 @@ import de.psdev.licensesdialog.model.Notices;
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.applications.TransferApplication;
+import me.kartikarora.transfersh.helpers.UtilsHelper;
 
 /**
  * Developer: chipset
@@ -49,7 +49,6 @@ import me.kartikarora.transfersh.applications.TransferApplication;
  * Date : 30/6/16
  */
 public class AboutActivity extends AppCompatActivity {
-    private Tracker mTracker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,12 +56,9 @@ public class AboutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_about);
 
         TransferApplication application = (TransferApplication) getApplication();
-        mTracker = application.getDefaultTracker();
+        FirebaseAnalytics firebaseAnalytics = application.getDefaultTracker();
 
-        mTracker.send(new HitBuilders.EventBuilder()
-                .setCategory("Activity : " + this.getClass().getSimpleName())
-                .setAction("Launched")
-                .build());
+        UtilsHelper.getInstance().trackEvent(firebaseAnalytics, "Activity : " + this.getClass().getSimpleName(), "Launched");
 
         CardView aboutCardView = (CardView) findViewById(R.id.about_card);
         CardView openSourceLicensesCardView = (CardView) findViewById(R.id.open_source_licenses_card);

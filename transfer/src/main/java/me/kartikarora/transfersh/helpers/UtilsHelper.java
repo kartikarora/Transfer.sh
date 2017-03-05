@@ -4,7 +4,10 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
+
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -49,5 +52,12 @@ public class UtilsHelper {
 
     public SimpleDateFormat getSdf() {
         return sdf;
+    }
+
+    public void trackEvent(FirebaseAnalytics firebaseAnalytics, String ... params) {
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_CATEGORY, params[0]);
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, params[1]);
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 }
