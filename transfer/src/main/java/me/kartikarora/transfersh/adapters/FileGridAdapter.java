@@ -40,6 +40,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.apache.commons.io.FilenameUtils;
 
+import java.util.Locale;
+
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.contracts.FilesContract;
@@ -97,7 +99,7 @@ public class FileGridAdapter extends CursorAdapter {
         final String url = cursor.getString(urlCol);
         holder.fileNameTextView.setText(name);
         String ext = FilenameUtils.getExtension(name);
-        holder.fileTypeImageView.setText(ext.toUpperCase());
+        holder.fileTypeImageView.setText(ext.toUpperCase(Locale.US));
 
         holder.fileInfoImageButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -17,6 +17,8 @@ import me.kartikarora.transfersh.helpers.UtilsHelper;
 public class BootCompleteBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        UtilsHelper.getInstance().scheduleServiceJob(context);
+        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            UtilsHelper.getInstance().scheduleServiceJob(context);
+        }
     }
 }

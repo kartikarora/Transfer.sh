@@ -14,7 +14,6 @@ android:
         - 'android-sdk-license-.+'
 env:
     matrix:
-        - ANDROID_TARGET=android-20
         - ANDROID_TARGET=android-21
         - ANDROID_TARGET=android-22
         - ANDROID_TARGET=android-23

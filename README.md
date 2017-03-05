@@ -42,7 +42,7 @@ View [changelog](CHANGELOG.md)
 Read the [guidelines](CONTRIBUTION.md) for contribution to this app.
 
 Code is not the only way to contribute to this app. Join Crowdin to translate Transfer.sh. Join the project [here](https://crowdin.com/project/transfersh/invite)
-
+> Translations are crowd source. I am not responsible for any kind of incorrect translations or errors.
 ### Contributors
 
 List of [contributors](CONTRIBUTORS.md)

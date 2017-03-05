@@ -26,6 +26,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:fullBackupContent="@xml/backup_rules"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
@@ -106,7 +107,7 @@
         <service
             android:name=".services.CheckAndNotifyOrDeleteService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false" />
         <service
             android:name=".services.ScheduledJobService"
             android:exported="true"

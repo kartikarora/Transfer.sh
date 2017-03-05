@@ -35,4 +35,5 @@
   <string name="view_grid">Visualizar como red</string>
   <string name="play_store_text">Calificar o evaluar en el Play Store</string>
   <string name="share">Compartir</string>
+  <string name="mimetype_image">Imagen de tipo MIME</string>
 </resources>
