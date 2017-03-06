@@ -71,7 +71,7 @@ public class AboutActivity extends AppCompatActivity {
         aboutCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String url = "http://kartikarora.me", name = "Transfer.sh", copyright = "Copyright (C) 2016 Kartik Arora";
+                String url = "http://kartikarora.me", name = "Transfer.sh", copyright = "Copyright (C) 2017 Kartik Arora";
                 License license = new ApacheSoftwareLicense20();
                 Notice notice = new Notice(name, url, copyright, license);
                 new LicensesDialog.Builder(AboutActivity.this)
@@ -133,7 +133,7 @@ public class AboutActivity extends AppCompatActivity {
                 notices.addNotice(notice);
 
                 name = "Potato Library";
-                copyright = "Copyright (c) 2016 Kartik Arora";
+                copyright = "Copyright (c) 2017 Kartik Arora";
                 url = "http://kartikarora.me/Potato-Library";
                 license = new MITLicense();
                 notice = new Notice(name, url, copyright, license);
