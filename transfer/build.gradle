@@ -26,6 +26,11 @@ android {
 
     buildTypes {
         release {
+            versionNameSuffix
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        beta {
             versionNameSuffix " - beta"
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

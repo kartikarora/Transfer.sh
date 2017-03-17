@@ -78,6 +78,7 @@ public class CheckAndNotifyOrDeleteService extends Service {
                         PendingIntent reuploadPendingIntent = PendingIntent.getActivity(this, 0, reuploadIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                         Notification notification = new NotificationCompat.Builder(getApplicationContext())
                                 .setContentTitle("Transfer.sh")
+                                .setSmallIcon(R.drawable.ic_info_white)
                                 .setContentText("Your uploaded file " + name + " is due for deletion tomorrow")
                                 .addAction(R.drawable.ic_upload, "RE UPLOAD", reuploadPendingIntent)
                                 .build();
