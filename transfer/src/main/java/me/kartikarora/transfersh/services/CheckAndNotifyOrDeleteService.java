@@ -70,7 +70,7 @@ public class CheckAndNotifyOrDeleteService extends Service {
                     if (days == 3) {
                         Potato.potate(getApplicationContext()).Notifications().showNotificationDefaultSound("Transfer.sh",
                                 "Your uploaded file " + name + " is scheduled for deletion in 3 days",
-                                R.mipmap.ic_launcher, new Intent(getApplicationContext(), TransferActivity.class));
+                                R.drawable.ic_notification, new Intent(getApplicationContext(), TransferActivity.class));
                     } else if (days == 1) {
                         Intent reuploadIntent = new Intent(this, TransferActivity.class);
                         reuploadIntent.setAction(IntentAction.ACTION_REUPLOAD);
@@ -78,7 +78,7 @@ public class CheckAndNotifyOrDeleteService extends Service {
                         PendingIntent reuploadPendingIntent = PendingIntent.getActivity(this, 0, reuploadIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                         Notification notification = new NotificationCompat.Builder(getApplicationContext())
                                 .setContentTitle("Transfer.sh")
-                                .setSmallIcon(R.drawable.ic_info_white)
+                                .setSmallIcon(R.drawable.ic_notification)
                                 .setContentText("Your uploaded file " + name + " is due for deletion tomorrow")
                                 .addAction(R.drawable.ic_upload, "RE UPLOAD", reuploadPendingIntent)
                                 .build();
