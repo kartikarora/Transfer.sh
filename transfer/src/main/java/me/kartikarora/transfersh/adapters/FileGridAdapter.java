@@ -134,9 +134,10 @@ public class FileGridAdapter extends CursorAdapter {
             }
         });
 
-        view.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.fileDeleteImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
+            public void onClick(View v) {
+                UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Delete : " + url);
                 new AlertDialog.Builder(activity)
                         .setMessage("Delete file " + name + " ?")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -148,7 +149,6 @@ public class FileGridAdapter extends CursorAdapter {
                         })
                         .setNegativeButton(android.R.string.no, null)
                         .create().show();
-                return true;
             }
         });
     }
@@ -160,6 +160,7 @@ public class FileGridAdapter extends CursorAdapter {
         private ImageButton fileInfoImageButton;
         private ImageButton fileShareImageButton;
         private ImageButton fileDownloadImageButton;
+        private ImageButton fileDeleteImageButton;
 
         public FileItemViewHolder(View view) {
             fileNameTextView = (TextView) view.findViewById(R.id.file_item_name_text_view);
@@ -167,6 +168,7 @@ public class FileGridAdapter extends CursorAdapter {
             fileInfoImageButton = (ImageButton) view.findViewById(R.id.file_item_info_image_button);
             fileShareImageButton = (ImageButton) view.findViewById(R.id.file_item_share_image_button);
             fileDownloadImageButton = (ImageButton) view.findViewById(R.id.file_item_download_image_button);
+            fileDeleteImageButton = (ImageButton) view.findViewById(R.id.file_item_delete_image_button);
         }
     }
 
