@@ -18,9 +18,12 @@ package me.kartikarora.transfersh.applications;
 
 import android.app.Application;
 
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.springrole.stats.sdk.StatSDK;
 
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
@@ -48,6 +51,9 @@ public class TransferApplication extends Application {
         MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
         UtilsHelper.getInstance().scheduleServiceJob(TransferApplication.this);
         Stetho.initializeWithDefaults(this);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
+        StatSDK.initSDK(this);
     }
 
     private FirebaseAnalytics mFirebaseAnalytics;
