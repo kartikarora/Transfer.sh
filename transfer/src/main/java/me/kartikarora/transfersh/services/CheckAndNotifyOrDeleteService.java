@@ -31,7 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
-import chipset.potato.Potato;
+import me.kartikarora.potato.Potato;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.actions.IntentAction;
 import me.kartikarora.transfersh.activities.TransferActivity;

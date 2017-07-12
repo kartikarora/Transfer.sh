@@ -95,11 +95,11 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer);
-        mNoFilesTextView = (TextView) findViewById(R.id.no_files_text_view);
-        mFileItemsGridView = (GridView) findViewById(R.id.file_grid_view);
-        FloatingActionButton uploadFileButton = (FloatingActionButton) findViewById(R.id.upload_file_fab);
-        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
-        mAdView = (AdView) findViewById(R.id.banner_ad_view);
+        mNoFilesTextView = findViewById(R.id.no_files_text_view);
+        mFileItemsGridView = findViewById(R.id.file_grid_view);
+        FloatingActionButton uploadFileButton = findViewById(R.id.upload_file_fab);
+        mCoordinatorLayout = findViewById(R.id.coordinator_layout);
+        mAdView = findViewById(R.id.banner_ad_view);
 
         if (uploadFileButton != null) {
             uploadFileButton.setOnClickListener(new View.OnClickListener() {

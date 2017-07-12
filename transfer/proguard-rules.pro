@@ -21,11 +21,14 @@
 -keep class com.squareup.okhttp.** { *; }
 -keep class retrofit.** { *; }
 -keep interface com.squareup.okhttp.** { *; }
+-keep class com.springrole.stat.** { *; }
+-keep interface com.springrole.stat.** { *; }
 
 -dontwarn com.squareup.okhttp.**
 -dontwarn okio.**
 -dontwarn retrofit.**
 -dontwarn rx.**
+-dontwarn com.springrole.stat.**
 
 -keepclasseswithmembers class * {
     @retrofit.http.* <methods>;
