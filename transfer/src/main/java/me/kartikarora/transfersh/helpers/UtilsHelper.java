@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import me.kartikarora.transfersh.BuildConfig;
-import me.kartikarora.transfersh.services.ScheduledJobService;
+import me.kartikarora.transfersh.services.ScheduledCheckAndNotifiyOrDeleteJobService;
 
 /**
  * Developer: chipset
@@ -37,11 +37,11 @@ public class UtilsHelper {
     }
 
     public void scheduleServiceJob(Context context) {
-        ComponentName componentName = new ComponentName(context, ScheduledJobService.class);
+        ComponentName componentName = new ComponentName(context, ScheduledCheckAndNotifiyOrDeleteJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(BuildConfig.VERSION_CODE / 10000, componentName)
                 .setRequiresCharging(false)
                 .setRequiresDeviceIdle(false)
-                .setPeriodic(24 * 60 * 60 * 1000);
+                .setPeriodic(60 * 60 * 1000);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         if (jobScheduler.schedule(builder.build()) == JobScheduler.RESULT_FAILURE) {
             Log.e("Transfer.sh", "Job Initiation Failed");

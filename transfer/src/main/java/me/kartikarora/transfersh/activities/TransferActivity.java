@@ -140,6 +140,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice("2F50AAA33A5225F171002E20B341E95D")
                 .addTestDevice("DC2B94757C55E75585530EED78BBADEB")
+                .addTestDevice("49DEAD2FC82A68B711394F1427F0FD87")
                 .build();
         mAdView.loadAd(adRequest);
         String action = getIntent().getAction();
