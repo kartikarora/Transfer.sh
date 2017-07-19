@@ -21,7 +21,7 @@ import retrofit.RestAdapter;
 import retrofit.http.Body;
 import retrofit.http.PUT;
 import retrofit.http.Path;
-import retrofit.mime.TypedFile;
+import retrofit.mime.MultipartTypedOutput;
 
 /**
  * Developer: chipset
@@ -45,6 +45,6 @@ public class TransferClient {
 
     public interface TransferInterface {
         @PUT("/{name}")
-        void uploadFile(@Body TypedFile typedFile, @Path("name") String name, ResponseCallback callback);
+        void uploadFile(@Body MultipartTypedOutput typedFile, @Path("name") String name, ResponseCallback callback);
     }
 }

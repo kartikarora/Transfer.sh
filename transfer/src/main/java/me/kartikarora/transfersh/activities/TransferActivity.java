@@ -16,7 +16,6 @@
 
 package me.kartikarora.transfersh.activities;
 
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,13 +25,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,12 +66,13 @@ import me.kartikarora.transfersh.actions.IntentAction;
 import me.kartikarora.transfersh.adapters.FileGridAdapter;
 import me.kartikarora.transfersh.applications.TransferApplication;
 import me.kartikarora.transfersh.contracts.FilesContract;
+import me.kartikarora.transfersh.custom.CountingTypedFile;
 import me.kartikarora.transfersh.helpers.UtilsHelper;
 import me.kartikarora.transfersh.network.TransferClient;
 import retrofit.ResponseCallback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import retrofit.mime.TypedFile;
+import retrofit.mime.MultipartTypedOutput;
 
 /**
  * Developer: chipset
@@ -89,6 +93,8 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     private AdView mAdView;
     private SharedPreferences mSharedPreferences = null;
     private Cursor mData = null;
+    private ConstraintLayout bottomSheet;
+    private BottomSheetBehavior<ConstraintLayout> uploadBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +106,9 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         FloatingActionButton uploadFileButton = findViewById(R.id.upload_file_fab);
         mCoordinatorLayout = findViewById(R.id.coordinator_layout);
         mAdView = findViewById(R.id.banner_ad_view);
+        bottomSheet = findViewById(R.id.bottom_sheet);
+        uploadBehavior = BottomSheetBehavior.from(bottomSheet);
+        uploadBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         if (uploadFileButton != null) {
             uploadFileButton.setOnClickListener(new View.OnClickListener() {
@@ -189,10 +198,11 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     }
 
     private void uploadFile(final Uri uri) throws IOException {
-        final ProgressDialog dialog = new ProgressDialog(TransferActivity.this);
-        dialog.setMessage(getString(R.string.uploading_file));
-        dialog.setCancelable(false);
-        dialog.show();
+
+        uploadBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        TextView nameTextView = bottomSheet.findViewById(R.id.file_name_text_view);
+        final ContentLoadingProgressBar progressBar = bottomSheet.findViewById(R.id.file_upload_progress_bar);
+
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
@@ -204,8 +214,18 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             if (inputStream != null) {
                 IOUtils.copy(inputStream, outputStream);
                 final File file = new File(getFilesDir(), name);
-                TypedFile typedFile = new TypedFile(mimeType, file);
-                TransferClient.getInterface().uploadFile(typedFile, name, new ResponseCallback() {
+                nameTextView.setText(name);
+                MultipartTypedOutput multipartTypedOutput = new MultipartTypedOutput();
+                multipartTypedOutput.addPart(name, new CountingTypedFile(mimeType, file, new CountingTypedFile.FileUploadListener() {
+                    @Override
+                    public void uploaded(long num) {
+                        int per = Math.round((num / (float) file.length()) * 100);
+                        String percent = per + "%";
+                        Log.i("uploaded: ", "" + percent);
+                        progressBar.setProgress(per);
+                    }
+                }));
+                TransferClient.getInterface().uploadFile(multipartTypedOutput, name, new ResponseCallback() {
                     @Override
                     public void success(Response response) {
                         BufferedReader reader;
@@ -253,15 +273,13 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                         values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
                         getContentResolver().insert(FilesContract.BASE_CONTENT_URI, values);
                         FileUtils.deleteQuietly(file);
-                        if (dialog.isShowing())
-                            dialog.hide();
+                        uploadBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }
 
                     @Override
                     public void failure(RetrofitError error) {
                         error.printStackTrace();
-                        if (dialog.isShowing())
-                            dialog.hide();
+                        uploadBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                         Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
                     }
                 });

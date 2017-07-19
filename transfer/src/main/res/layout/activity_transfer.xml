@@ -49,9 +49,11 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/no_files_uploaded"
-            android:visibility="gone"
-            android:textSize="28sp" />
+            android:textSize="28sp"
+            android:visibility="gone" />
     </RelativeLayout>
+
+    <include layout="@layout/bottom_sheet_upload_layout" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/upload_file_fab"
@@ -60,7 +62,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/activity_vertical_margin"
         app:fabSize="normal"
-        app:layout_behavior=".behaviours.FABScrollAwareBehavior"
+        app:layout_anchor="@+id/bottom_sheet"
+        app:layout_anchorGravity="top|end"
         app:srcCompat="@drawable/ic_file_upload"
         app:useCompatPadding="true" />
 </android.support.design.widget.CoordinatorLayout>
