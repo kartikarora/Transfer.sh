@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Kartik Arora
+ * Copyright 2018 Kartik Arora
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.firebase.analytics.FirebaseAnalytics;

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
 static def getDate() {
     def date = new Date()
@@ -56,8 +57,10 @@ dependencies {
     compile 'com.facebook.stetho:stetho:1.5.0'
     compile 'de.psdev.licensesdialog:licensesdialog:1.8.1'
     compile 'me.kartikarora.potato:library:0.2.0'
-    compile 'ch.acra:acra:4.9.2'
     compile 'com.facebook.android:facebook-android-sdk:4.18.0'
+    compile('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
+        transitive = true
+    }
 }
 
 
