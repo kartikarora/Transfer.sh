@@ -7,9 +7,9 @@
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/appCompatImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher_round"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@drawable/transfersh_logo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
