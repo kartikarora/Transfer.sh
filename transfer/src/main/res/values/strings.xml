@@ -42,4 +42,8 @@
     <string name="play_store_text">Rate and/or review on Play Store</string>
     <string name="share">Share</string>
     <string name="mimetype_image">Mimetype Image</string>
+    <string name="server_error">Server Error</string>
+    <string name="server_error_message">Server at %1$s could not be found. Please enter the correct URL</string>
+    <string name="setup_url_message">Enter the URL with which you would like to use this service. Press %1$s if you want to use the default server.</string>
+    <string name="setup_url">Enter URL</string>
 </resources>

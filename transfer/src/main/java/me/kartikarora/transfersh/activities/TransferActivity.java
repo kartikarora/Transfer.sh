@@ -41,7 +41,6 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -60,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import me.kartikarora.potato.Potato;
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.actions.IntentAction;
@@ -73,6 +73,8 @@ import retrofit.ResponseCallback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.mime.MultipartTypedOutput;
+
+import static me.kartikarora.transfersh.activities.SplashActivity.PREF_URL_FLAG;
 
 /**
  * Developer: chipset
@@ -129,8 +131,9 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
         UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Activity : " + this.getClass().getSimpleName(), "Launched");
 
-        mSharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
-        showAsGrid = mSharedPreferences.getBoolean(PREF_GRID_VIEW_FLAG, true);
+//        mSharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
+//        showAsGrid = mSharedPreferences.getBoolean(PREF_GRID_VIEW_FLAG, true);
+        showAsGrid = Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceBoolean(PREF_GRID_VIEW_FLAG);
 
         mUploadBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -243,7 +246,8 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                         progressBar.setProgress(per);
                     }
                 }));
-                TransferClient.getInterface().uploadFile(multipartTypedOutput, name, new ResponseCallback() {
+                String baseUrl = Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceString(PREF_URL_FLAG);
+                TransferClient.getInterface(baseUrl).uploadFile(multipartTypedOutput, name, new ResponseCallback() {
                     @Override
                     public void success(Response response) {
                         BufferedReader reader;

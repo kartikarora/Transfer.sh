@@ -86,7 +86,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.TransferActivity" />
         </activity>
-        <activity android:name=".activities.SplashActivity">
+        <activity
+            android:name=".activities.SplashActivity"
+            android:theme="@style/AppTheme.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

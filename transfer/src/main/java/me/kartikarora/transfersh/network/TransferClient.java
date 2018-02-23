@@ -16,9 +16,11 @@
 
 package me.kartikarora.transfersh.network;
 
+import retrofit.Callback;
 import retrofit.ResponseCallback;
 import retrofit.RestAdapter;
 import retrofit.http.Body;
+import retrofit.http.GET;
 import retrofit.http.PUT;
 import retrofit.http.Path;
 import retrofit.mime.MultipartTypedOutput;
@@ -33,10 +35,11 @@ public class TransferClient {
 
     private static TransferInterface transferInterface = null;
 
-    public static TransferInterface getInterface() {
+
+    public static TransferInterface getInterface(String baseURL) {
         if (transferInterface == null) {
             RestAdapter adapter = new RestAdapter.Builder()
-                    .setEndpoint("https://transfer.sh")
+                    .setEndpoint(baseURL)
                     .build();
             transferInterface = adapter.create(TransferInterface.class);
         }
@@ -46,5 +49,8 @@ public class TransferClient {
     public interface TransferInterface {
         @PUT("/{name}")
         void uploadFile(@Body MultipartTypedOutput typedFile, @Path("name") String name, ResponseCallback callback);
+
+        @GET("/")
+        void pingServer(ResponseCallback callback);
     }
 }
