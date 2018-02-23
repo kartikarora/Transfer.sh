@@ -16,7 +16,9 @@
 
 package me.kartikarora.transfersh.activities;
 
+import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -34,10 +36,14 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -58,6 +64,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import me.kartikarora.potato.Potato;
 import me.kartikarora.transfersh.BuildConfig;
@@ -71,6 +78,7 @@ import me.kartikarora.transfersh.helpers.UtilsHelper;
 import me.kartikarora.transfersh.network.TransferClient;
 import retrofit.ResponseCallback;
 import retrofit.RetrofitError;
+import retrofit.client.Header;
 import retrofit.client.Response;
 import retrofit.mime.MultipartTypedOutput;
 
@@ -357,12 +365,14 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             startActivity(new Intent(this, AboutActivity.class));
         } else if (item.getItemId() == R.id.action_view_grid) {
             showAsGrid = true;
-            mSharedPreferences.edit().putBoolean(PREF_GRID_VIEW_FLAG, true).apply();
+            Potato.potate(TransferActivity.this).Preferences().putSharedPreference(PREF_GRID_VIEW_FLAG, true);
             mFileItemsGridView.setNumColumns(getResources().getInteger(R.integer.col_count));
         } else if (item.getItemId() == R.id.action_view_list) {
             showAsGrid = false;
-            mSharedPreferences.edit().putBoolean(PREF_GRID_VIEW_FLAG, false).apply();
+            Potato.potate(TransferActivity.this).Preferences().putSharedPreference(PREF_GRID_VIEW_FLAG, false);
             mFileItemsGridView.setNumColumns(1);
+        } else if (item.getItemId() == R.id.action_set_server_url) {
+            setServerUrl(getString(R.string.setup_url), getString(R.string.setup_url_message_change, getString(android.R.string.cancel)));
         }
         invalidateOptionsMenu();
         display(mData);
@@ -385,5 +395,73 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             mFileItemsGridView.setVisibility(View.VISIBLE);
             mNoFilesTextView.setVisibility(View.GONE);
         }
+    }
+
+    private void setServerUrl(String title, String message) {
+        final String[] serverURL = {Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceString(PREF_URL_FLAG)};
+        AlertDialog.Builder builder = new AlertDialog.Builder(TransferActivity.this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        input.setHint(serverURL[0]);
+        builder.setView(input);
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                serverURL[0] = input.getText().toString();
+                beginCheck(serverURL[0]);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                beginCheck(serverURL[0]);
+            }
+        });
+        builder.show();
+    }
+
+    private void beginCheck(final String serverURL) {
+        final ProgressDialog dialog = new ProgressDialog(TransferActivity.this);
+        dialog.setMessage(getString(R.string.please_wait));
+        dialog.show();
+
+        TransferClient.nullifyClient();
+        TransferClient.getInterface(serverURL).pingServer(new ResponseCallback() {
+            @Override
+            public void success(Response response) {
+                if (response.getStatus() == 200) {
+                    List<Header> headerList = response.getHeaders();
+                    for (Header header : headerList) {
+                        if (!TextUtils.isEmpty(header.getName()) && header.getName().equalsIgnoreCase("server")) {
+                            String value = header.getValue();
+                            if (value.toLowerCase().contains("transfer.sh")) {
+                                Potato.potate(TransferActivity.this).Preferences().putSharedPreference(PREF_URL_FLAG, serverURL);
+                                if (dialog.isShowing()) {
+                                    dialog.cancel();
+                                    dialog.dismiss();
+                                }
+                            } else {
+                                setServerUrl(getString(R.string.server_error), getString(R.string.server_error_message, serverURL));
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                error.printStackTrace();
+                if (dialog.isShowing()) {
+                    dialog.cancel();
+                    dialog.dismiss();
+                }
+                setServerUrl(getString(R.string.server_error), getString(R.string.server_error_message, serverURL));
+            }
+        });
     }
 }

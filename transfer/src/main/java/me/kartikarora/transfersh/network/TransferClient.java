@@ -16,7 +16,6 @@
 
 package me.kartikarora.transfersh.network;
 
-import retrofit.Callback;
 import retrofit.ResponseCallback;
 import retrofit.RestAdapter;
 import retrofit.http.Body;
@@ -35,7 +34,6 @@ public class TransferClient {
 
     private static TransferInterface transferInterface = null;
 
-
     public static TransferInterface getInterface(String baseURL) {
         if (transferInterface == null) {
             RestAdapter adapter = new RestAdapter.Builder()
@@ -52,5 +50,9 @@ public class TransferClient {
 
         @GET("/")
         void pingServer(ResponseCallback callback);
+    }
+
+    public static void nullifyClient() {
+        transferInterface = null;
     }
 }

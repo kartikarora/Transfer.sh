@@ -29,4 +29,8 @@
         android:icon="@drawable/ic_info_white"
         android:title="@string/about_app"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_set_server_url"
+        android:title="@string/set_server_url"
+        app:showAsAction="never" />
 </menu>

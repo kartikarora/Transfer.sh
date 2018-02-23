@@ -53,6 +53,7 @@ public class TransferApplication extends Application {
                 .debuggable(true)           // Enables Crashlytics debugger
                 .build();
         Fabric.with(fabric);
+
     }
 
     private FirebaseAnalytics mFirebaseAnalytics;

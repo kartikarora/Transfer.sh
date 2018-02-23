@@ -15,11 +15,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import java.util.List;
+
 import me.kartikarora.potato.Potato;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.network.TransferClient;
 import retrofit.ResponseCallback;
 import retrofit.RetrofitError;
+import retrofit.client.Header;
 import retrofit.client.Response;
 
 /**
@@ -55,46 +58,55 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void beginCheck() {
+        TransferClient.nullifyClient();
         TransferClient.getInterface(serverURL).pingServer(new ResponseCallback() {
             @Override
             public void success(Response response) {
                 if (response.getStatus() == 200) {
 
-                    Potato.potate(SplashActivity.this).Preferences().putSharedPreference(PREF_URL_FLAG, serverURL);
+                    List<Header> headerList = response.getHeaders();
+                    for (Header header : headerList) {
+                        if (!TextUtils.isEmpty(header.getName()) && header.getName().equalsIgnoreCase("server")) {
+                            String value = header.getValue();
+                            if (value.toLowerCase().contains("transfer.sh")) {
+                                Potato.potate(SplashActivity.this).Preferences().putSharedPreference(PREF_URL_FLAG, serverURL);
 
 
-                    if (setupProgressBar.isShown()) {
-                        setupProgressBar.setVisibility(View.GONE);
-                        readyButton.setVisibility(View.VISIBLE);
-                    }
-
-                    if (readyButton.isShown()) {
-                        readyButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                ActivityOptions options = null;
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                    options = ActivityOptions.makeSceneTransitionAnimation(
-                                            SplashActivity.this,
-                                            android.util.Pair.create((View) readyButton, "coordinator_layout"));
+                                if (setupProgressBar.isShown()) {
+                                    setupProgressBar.setVisibility(View.GONE);
+                                    readyButton.setVisibility(View.VISIBLE);
                                 }
-                                startActivity(new Intent(SplashActivity.this, TransferActivity.class)
-                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP), options.toBundle());
+
+                                if (readyButton.isShown()) {
+                                    readyButton.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            ActivityOptions options = null;
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                                options = ActivityOptions.makeSceneTransitionAnimation(
+                                                        SplashActivity.this,
+                                                        android.util.Pair.create((View) readyButton, "coordinator_layout"));
+                                            }
+                                            startActivity(new Intent(SplashActivity.this, TransferActivity.class)
+                                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK), options.toBundle());
+                                        }
+                                    });
+                                } else {
+                                    ActivityOptions options = null;
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
+                                        options = ActivityOptions.makeSceneTransitionAnimation(
+                                                SplashActivity.this,
+                                                android.util.Pair.create((View) readyButton, "coordinator_layout"));
+                                    }
+                                    startActivity(new Intent(SplashActivity.this, TransferActivity.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK), options.toBundle());
+                                }
+                            } else {
+                                setServerUrl(getString(R.string.server_error), getString(R.string.server_error_message, serverURL));
                             }
-                        });
-                    } else {
-                        ActivityOptions options = null;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-                            options = ActivityOptions.makeSceneTransitionAnimation(
-                                    SplashActivity.this,
-                                    android.util.Pair.create((View) readyButton, "coordinator_layout"));
                         }
-                        startActivity(new Intent(SplashActivity.this, TransferActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP), options.toBundle());
                     }
-
-
                 }
             }
 
@@ -121,6 +133,9 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 serverURL = input.getText().toString();
+                if (TextUtils.isEmpty(serverURL)) {
+                    serverURL = "https://transfer.sh";
+                }
                 beginCheck();
             }
         });

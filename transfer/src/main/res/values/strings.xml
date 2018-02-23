@@ -43,7 +43,10 @@
     <string name="share">Share</string>
     <string name="mimetype_image">Mimetype Image</string>
     <string name="server_error">Server Error</string>
-    <string name="server_error_message">Server at %1$s could not be found. Please enter the correct URL</string>
+    <string name="server_error_message">Server at %1$s could not be found or is not a valid Transfer.sh server. Please enter the correct URL</string>
     <string name="setup_url_message">Enter the URL with which you would like to use this service. Press %1$s if you want to use the default server.</string>
+    <string name="setup_url_message_change">Enter the URL with which you would like to use this service. Press %1$s if you want to use the current server.</string>
     <string name="setup_url">Enter URL</string>
+    <string name="set_server_url">Set server URL</string>
+    <string name="please_wait">Please wait</string>
 </resources>
