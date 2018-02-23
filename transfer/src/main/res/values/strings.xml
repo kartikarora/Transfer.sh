@@ -24,7 +24,7 @@
 
     <string name="no_files_uploaded">No files uploaded</string>
     <string name="download_complete">Download Complete</string>
-    <string name="uploading_file">Uploading file</string>
+    <string name="uploading_file">Uploading %1$s</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="uploaded">uploaded</string>
     <string name="report">Report</string>

@@ -18,7 +18,7 @@
 <resources>
   <string name="no_files_uploaded">कोई फ़ाइल अपलोड नहीं है</string>
   <string name="download_complete">डाउनलोड पूर्ण</string>
-  <string name="uploading_file">फ़ाइल अपलोड</string>
+  <string name="uploading_file">फ़ाइल अपलोड %1$s</string>
   <string name="something_went_wrong">कुछ गलत हुआ</string>
   <string name="uploaded">अपलोड किया गया</string>
   <string name="report">रिपोर्ट</string>

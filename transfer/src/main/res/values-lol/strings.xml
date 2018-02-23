@@ -18,7 +18,7 @@
 <resources>
   <string name="no_files_uploaded">Nuthin\' Uploaded ;~;</string>
   <string name="download_complete">Downlode Dun</string>
-  <string name="uploading_file">Uploadin foil :D</string>
+  <string name="uploading_file">Uploadin foil :D %1$s</string>
   <string name="something_went_wrong">Uh-Ohs</string>
   <string name="uploaded">uploadeds</string>
   <string name="report">Reporht</string>

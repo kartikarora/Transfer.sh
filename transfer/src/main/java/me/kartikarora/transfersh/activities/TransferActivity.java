@@ -35,7 +35,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -93,25 +92,27 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     private AdView mAdView;
     private SharedPreferences mSharedPreferences = null;
     private Cursor mData = null;
-    private ConstraintLayout bottomSheet;
-    private BottomSheetBehavior<ConstraintLayout> uploadBehavior;
+    private ConstraintLayout mUploadBottomSheet;
+    private BottomSheetBehavior<ConstraintLayout> mUploadBottomSheetBehavior;
+    private FloatingActionButton mUploadFileButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer);
+
         mNoFilesTextView = findViewById(R.id.no_files_text_view);
         mFileItemsGridView = findViewById(R.id.file_grid_view);
-        FloatingActionButton uploadFileButton = findViewById(R.id.upload_file_fab);
+        mUploadFileButton = findViewById(R.id.upload_file_fab);
         mCoordinatorLayout = findViewById(R.id.coordinator_layout);
         mAdView = findViewById(R.id.banner_ad_view);
-        bottomSheet = findViewById(R.id.bottom_sheet);
-        uploadBehavior = BottomSheetBehavior.from(bottomSheet);
-        uploadBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        mUploadBottomSheet = findViewById(R.id.bottom_sheet);
+        mUploadBottomSheetBehavior = BottomSheetBehavior.from(mUploadBottomSheet);
+        mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-        if (uploadFileButton != null) {
-            uploadFileButton.setOnClickListener(new View.OnClickListener() {
+        if (mUploadFileButton != null) {
+            mUploadFileButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -129,6 +130,22 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
         mSharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
         showAsGrid = mSharedPreferences.getBoolean(PREF_GRID_VIEW_FLAG, true);
+
+        mUploadBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (BottomSheetBehavior.STATE_EXPANDED == newState) {
+                    mUploadFileButton.animate().scaleX(0).scaleY(0).setDuration(300).start();
+                } else if (BottomSheetBehavior.STATE_HIDDEN == newState) {
+                    mUploadFileButton.animate().scaleX(1).scaleY(1).setDuration(300).start();
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
     }
 
     @Override
@@ -199,9 +216,10 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
     private void uploadFile(final Uri uri) throws IOException {
 
-        uploadBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        TextView nameTextView = bottomSheet.findViewById(R.id.file_name_text_view);
-        final ContentLoadingProgressBar progressBar = bottomSheet.findViewById(R.id.file_upload_progress_bar);
+        mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        TextView nameTextView = mUploadBottomSheet.findViewById(R.id.uploading_file_text_view);
+        final TextView percentTextView = mUploadBottomSheet.findViewById(R.id.uploading_percent_text_view);
+        final ContentLoadingProgressBar progressBar = mUploadBottomSheet.findViewById(R.id.file_upload_progress_bar);
 
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
         if (cursor != null) {
@@ -214,14 +232,13 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             if (inputStream != null) {
                 IOUtils.copy(inputStream, outputStream);
                 final File file = new File(getFilesDir(), name);
-                nameTextView.setText(name);
+                nameTextView.setText(getString(R.string.uploading_file, name));
                 MultipartTypedOutput multipartTypedOutput = new MultipartTypedOutput();
                 multipartTypedOutput.addPart(name, new CountingTypedFile(mimeType, file, new CountingTypedFile.FileUploadListener() {
                     @Override
                     public void uploaded(long num) {
                         int per = Math.round((num / (float) file.length()) * 100);
-                        String percent = per + "%";
-                        Log.i("uploaded: ", "" + percent);
+                        percentTextView.setText(per + "%");
                         progressBar.setProgress(per);
                     }
                 }));
@@ -273,13 +290,13 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                         values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
                         getContentResolver().insert(FilesContract.BASE_CONTENT_URI, values);
                         FileUtils.deleteQuietly(file);
-                        uploadBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                        mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }
 
                     @Override
                     public void failure(RetrofitError error) {
                         error.printStackTrace();
-                        uploadBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                        mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                         Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
                     }
                 });

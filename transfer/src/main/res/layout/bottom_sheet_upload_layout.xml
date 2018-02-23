@@ -1,37 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bottom_sheet"
     android:layout_width="match_parent"
     android:layout_height="100dp"
-    android:background="@android:color/darker_gray"
+    android:background="?attr/colorPrimary"
     android:orientation="vertical"
+    android:elevation="8dp"
     app:behavior_hideable="true"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
 
     <TextView
+        android:id="@+id/uploading_file_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/uploading_file"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-        android:textColor="@android:color/white"
-        android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/file_name_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:gravity="center"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
         android:textColor="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/file_upload_progress_bar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/file_upload_progress_bar"
+        tools:text="@tools:sample/lorem" />
+
+    <TextView
+        android:id="@+id/uploading_percent_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/uploading_file_text_view"
+        tools:text="@tools:sample/lorem" />
 
     <android.support.v4.widget.ContentLoadingProgressBar
         android:id="@+id/file_upload_progress_bar"

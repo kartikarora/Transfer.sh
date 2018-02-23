@@ -18,7 +18,7 @@
 <resources>
   <string name="no_files_uploaded">Aucun fichier envoyé</string>
   <string name="download_complete">Téléchargement terminé</string>
-  <string name="uploading_file">Envoi du fichier</string>
+  <string name="uploading_file">Envoi du fichier %1$s</string>
   <string name="something_went_wrong">Quelque chose s\'est mal passé</string>
   <string name="uploaded">envoyé</string>
   <string name="report">Signaler</string>
