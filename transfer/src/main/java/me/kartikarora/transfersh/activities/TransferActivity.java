@@ -20,7 +20,6 @@ import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -101,7 +100,6 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     private FileGridAdapter mAdapter;
     private FirebaseAnalytics mFirebaseAnalytics;
     private AdView mAdView;
-    private SharedPreferences mSharedPreferences = null;
     private Cursor mData = null;
     private ConstraintLayout mUploadBottomSheet;
     private BottomSheetBehavior<ConstraintLayout> mUploadBottomSheetBehavior;
@@ -139,8 +137,6 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
         UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Activity : " + this.getClass().getSimpleName(), "Launched");
 
-//        mSharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
-//        showAsGrid = mSharedPreferences.getBoolean(PREF_GRID_VIEW_FLAG, true);
         showAsGrid = Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceBoolean(PREF_GRID_VIEW_FLAG);
 
         mUploadBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -175,11 +171,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     @Override
     protected void onResume() {
         super.onResume();
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("2F50AAA33A5225F171002E20B341E95D")
-                .addTestDevice("DC2B94757C55E75585530EED78BBADEB")
-                .addTestDevice("49DEAD2FC82A68B711394F1427F0FD87")
-                .build();
+        AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
         String action = getIntent().getAction();
         if (Intent.ACTION_SEND.equals(action)) {
@@ -412,6 +404,9 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 serverURL[0] = input.getText().toString();
+                if (TextUtils.isEmpty(serverURL[0])) {
+                    serverURL[0] = "https://transfer.sh";
+                }
                 beginCheck(serverURL[0]);
             }
         });
