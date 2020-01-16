@@ -1,12 +1,8 @@
 # Transfer.sh - Upload and Share [![License](https://img.shields.io/badge/license-Apache%202-blue.svg?style=flat)](LICENSE.md) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/transfersh/localized.svg)](https://crowdin.com/project/transfersh) [![Analytics](https://ga-beacon.appspot.com/UA-79412295-2/README?pixel)](https://github.com/igrigorik/ga-beacon)
 
-Easy file sharing from the your Android device!
-
-Inspired from [transfer.sh](https://transfer.sh/) by [Dutch Coders](http://dutchcoders.io/)
-
-<a href='https://play.google.com/store/apps/details?id=me.kartikarora.transfersh&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1' target='_blank'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="100" width="260"/></a>
-
-**OR**
+*THIS APP IS NOT ACTIVELY MAINTAINED, FOR NOW*
+*Ensure that gradle wrapper is using gradle 4.6 for building the app successfully*
+*And add your `google-services.json` in the `transfer` module*
 
 Download the latest apk from [here](https://github.com/kartikarora/Transfer.sh/releases/latest) 
 Works for Android KitKat (19) and above
