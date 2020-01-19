@@ -18,13 +18,9 @@ package me.kartikarora.transfersh.activities;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -40,17 +36,10 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
-import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
@@ -58,16 +47,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.widget.ContentLoadingProgressBar;
-import me.kartikarora.potato.Potato;
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
-import me.kartikarora.transfersh.actions.IntentAction;
 import me.kartikarora.transfersh.adapters.FileGridAdapter;
 import me.kartikarora.transfersh.applications.TransferApplication;
-import me.kartikarora.transfersh.contracts.FilesContract;
 import me.kartikarora.transfersh.contracts.TransferActivityContract;
-import me.kartikarora.transfersh.helpers.UtilsHelper;
-import me.kartikarora.transfersh.network.NetworkResponseListener;
 import me.kartikarora.transfersh.presenter.TransferActivityPresenter;
 
 /**
@@ -79,22 +63,17 @@ import me.kartikarora.transfersh.presenter.TransferActivityPresenter;
 public class TransferActivity extends AppCompatActivity implements TransferActivityContract.View {
 
     private static final int FILE_RESULT_CODE = BuildConfig.VERSION_CODE / 10000;
-    private static final String PREF_GRID_VIEW_FLAG = "gridFlag";
-    private boolean showAsGrid = false;
+    public static final String PREF_GRID_VIEW_FLAG = "gridFlag";
     private CoordinatorLayout mCoordinatorLayout;
     private TextView mNoFilesTextView;
     private GridView mFileItemsGridView;
     private FileGridAdapter mAdapter;
-    private FirebaseAnalytics mFirebaseAnalytics;
     private AdView mAdView;
-    private Cursor mData = null;
-    private ConstraintLayout mUploadBottomSheet;
     private BottomSheetBehavior<ConstraintLayout> mUploadBottomSheetBehavior;
     private FloatingActionButton mUploadFileButton;
     private TextView mNameTextView;
     private TextView mPercentTextView;
     private ContentLoadingProgressBar mProgressBar;
-    private NetworkResponseListener mListener;
     private ProgressDialog pleaseWaitDialog;
     private AlertDialog serverUrlChangeDialog;
     private TransferActivityContract.Presenter mPresenter;
@@ -106,7 +85,7 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
         setContentView(R.layout.activity_transfer);
 
         mPresenter = new TransferActivityPresenter(this);
-        mPresenter.requestDataFromLoader();
+        mPresenter.onCreate((TransferApplication) getApplication());
     }
 
     @Override
@@ -116,23 +95,20 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
         mUploadFileButton = findViewById(R.id.upload_file_fab);
         mCoordinatorLayout = findViewById(R.id.coordinator_layout);
         mAdView = findViewById(R.id.banner_ad_view);
-        mUploadBottomSheet = findViewById(R.id.bottom_sheet);
-        mNameTextView = mUploadBottomSheet.findViewById(R.id.uploading_file_text_view);
-        mPercentTextView = mUploadBottomSheet.findViewById(R.id.uploading_percent_text_view);
-        mProgressBar = mUploadBottomSheet.findViewById(R.id.file_upload_progress_bar);
-        mUploadBottomSheetBehavior = BottomSheetBehavior.from(mUploadBottomSheet);
+        ConstraintLayout uploadBottomSheet = findViewById(R.id.bottom_sheet);
+        mNameTextView = uploadBottomSheet.findViewById(R.id.uploading_file_text_view);
+        mPercentTextView = uploadBottomSheet.findViewById(R.id.uploading_percent_text_view);
+        mProgressBar = uploadBottomSheet.findViewById(R.id.file_upload_progress_bar);
+        mUploadBottomSheetBehavior = BottomSheetBehavior.from(uploadBottomSheet);
         mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     @Override
     public void loadDataFromLoader() {
         getSupportLoaderManager().initLoader(BuildConfig.VERSION_CODE, null, mPresenter.getLoaderCallbacks());
-        TransferApplication application = (TransferApplication) getApplication();
-        mFirebaseAnalytics = application.getDefaultTracker();
 
-        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Activity : " + this.getClass().getSimpleName(), "Launched");
+        mPresenter.trackEvent("Activity : " + this.getClass().getSimpleName(), "Launched");
 
-        showAsGrid = Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceBoolean(PREF_GRID_VIEW_FLAG);
         mUploadBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -145,7 +121,7 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
+                // NOOP
             }
         });
     }
@@ -161,32 +137,7 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
     @Override
     protected void onResume() {
         super.onResume();
-        mPresenter.buildAdRequest();
-        String action = getIntent().getAction();
-        if (Intent.ACTION_SEND.equals(action)) {
-            Uri dataUri = getIntent().getParcelableExtra(Intent.EXTRA_STREAM);
-            mPresenter.initiateFileUploadFromUri(Objects.requireNonNull(dataUri));
-        } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
-            ArrayList<Uri> dataUris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-            for (Uri uri : Objects.requireNonNull(dataUris)) {
-                mPresenter.initiateFileUploadFromUri(uri);
-            }
-        } else if (IntentAction.ACTION_REUPLOAD.equals(action)) {
-            long id = getIntent().getLongExtra("file_id", -1);
-            if (id != -1) {
-                Cursor cursor = getContentResolver().query(FilesContract.BASE_CONTENT_URI, null, FilesContract.FilesEntry._ID + "=?", new String[]{String.valueOf(id)}, null);
-                if (cursor != null) {
-                    while (cursor.moveToNext()) {
-                        Uri uri = Uri.parse(getString(cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_URI)));
-                        mPresenter.initiateFileUploadFromUri(uri);
-                        getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
-                                new String[]{String.valueOf(id)});
-                        mAdapter.notifyDataSetChanged();
-                    }
-                    cursor.close();
-                }
-            }
-        }
+        mPresenter.onResume(getIntent());
     }
 
     @Override
@@ -195,66 +146,34 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
 
     }
 
-
-    private void addFileDetailsToDatabaseAndDeleteTemporaryFile(File file, Uri uri, String mimeType, String result) {
-        SimpleDateFormat sdf = UtilsHelper.getInstance().getSdf();
-        Calendar upCal = Calendar.getInstance();
-        upCal.setTime(new Date(file.lastModified()));
-        Calendar delCal = Calendar.getInstance();
-        delCal.setTime(upCal.getTime());
-        delCal.add(Calendar.DATE, 14);
-        ContentValues values = new ContentValues();
-        values.put(FilesContract.FilesEntry.COLUMN_NAME, file.getName());
-        values.put(FilesContract.FilesEntry.COLUMN_TYPE, mimeType);
-        values.put(FilesContract.FilesEntry.COLUMN_URL, result);
-        values.put(FilesContract.FilesEntry.COLUMN_URI, uri.toString());
-        values.put(FilesContract.FilesEntry.COLUMN_SIZE, String.valueOf(file.getTotalSpace()));
-        values.put(FilesContract.FilesEntry.COLUMN_DATE_UPLOAD, sdf.format(upCal.getTime()));
-        values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
-        getContentResolver().insert(FilesContract.BASE_CONTENT_URI, values);
-        FileUtils.deleteQuietly(file);
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == FileGridAdapter.PERM_REQUEST_CODE && grantResults.length > 0) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                mAdapter.getPermissionRequestResult().onPermitted();
-        }
+        mPresenter.onPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void tellAdapterThatPermissionWasGranted() {
+        mAdapter.getPermissionRequestResult().onPermitted();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_transfer, menu);
-        menu.getItem(0).setVisible(!showAsGrid);
-        menu.getItem(1).setVisible(showAsGrid);
+        mPresenter.computeCorrectMenuItem(menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_about) {
-            startActivity(new Intent(this, AboutActivity.class));
-        } else if (item.getItemId() == R.id.action_view_grid) {
-            showAsGrid = true;
-            Potato.potate(TransferActivity.this).Preferences().putSharedPreference(PREF_GRID_VIEW_FLAG, true);
-            mFileItemsGridView.setNumColumns(getResources().getInteger(R.integer.col_count));
-        } else if (item.getItemId() == R.id.action_view_list) {
-            showAsGrid = false;
-            Potato.potate(TransferActivity.this).Preferences().putSharedPreference(PREF_GRID_VIEW_FLAG, false);
-            mFileItemsGridView.setNumColumns(1);
-        } else if (item.getItemId() == R.id.action_set_server_url) {
-            mPresenter.initiateServerUrlChange();
-        }
+        mPresenter.optionsItemSelected(item.getItemId());
         invalidateOptionsMenu();
-        initGrid(mData);
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void initGrid(Cursor data) {
+    public void initGrid(@NotNull FileGridAdapter adapter) {
         if (mUploadFileButton != null) {
             mUploadFileButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -265,21 +184,20 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
                 }
             });
         }
-        mAdapter = new FileGridAdapter(TransferActivity.this, data, mFirebaseAnalytics, showAsGrid);
-        if (showAsGrid) {
-            mFileItemsGridView.setNumColumns(getResources().getInteger(R.integer.col_count));
-        } else {
-            mFileItemsGridView.setNumColumns(1);
-        }
+        mAdapter = adapter;
         mFileItemsGridView.setAdapter(mAdapter);
+    }
 
-        if (null != data && data.getCount() == 0) {
-            mFileItemsGridView.setVisibility(View.GONE);
-            mNoFilesTextView.setVisibility(View.VISIBLE);
-        } else {
-            mFileItemsGridView.setVisibility(View.VISIBLE);
-            mNoFilesTextView.setVisibility(View.GONE);
-        }
+    @Override
+    public void showGridView() {
+        mFileItemsGridView.setVisibility(View.VISIBLE);
+        mNoFilesTextView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void hideGridView() {
+        mFileItemsGridView.setVisibility(View.GONE);
+        mNoFilesTextView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -287,7 +205,6 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
         mFileItemsGridView.setVisibility(View.VISIBLE);
         mNoFilesTextView.setVisibility(View.GONE);
         mAdapter.swapCursor(null);
-        mData = null;
     }
 
     @Override
@@ -298,22 +215,6 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
     @Override
     public void showSnackbar(int textResource) {
         Snackbar.make(mCoordinatorLayout, getString(textResource), Snackbar.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showSnackbarWithAction(@NotNull String name, @NotNull final String shareableUrl) {
-        Snackbar.make(mCoordinatorLayout, name + getString(R.string.uploaded), Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.share, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Share : " + shareableUrl);
-                        startActivity(new Intent()
-                                .setAction(Intent.ACTION_SEND)
-                                .putExtra(Intent.EXTRA_TEXT, shareableUrl)
-                                .setType("text/plain")
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                    }
-                }).show();
     }
 
     @Override
@@ -364,6 +265,49 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
         serverUrlChangeDialog.cancel();
     }
 
+    @Override
+    public void loadAdRequest(@NotNull AdRequest adRequest) {
+        mAdView.loadAd(adRequest);
+    }
+
+    @NotNull
+    @Override
+    public String getStringFromResource(int resource) {
+        return getString(resource);
+    }
+
+    @Override
+    public void showSnackbarWithAction(@NotNull String text, int actionString, final Intent intent) {
+        Snackbar.make(mCoordinatorLayout, text, Snackbar.LENGTH_INDEFINITE)
+                .setAction(actionString, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mPresenter.snackBarActionClicked(intent);
+                    }
+                }).show();
+    }
+
+    @Override
+    public int getIntFromResource(int resource) {
+        return getResources().getInteger(R.integer.column_count);
+    }
+
+    @Override
+    public void setColumnCountOfGridView(int columnCount) {
+        mFileItemsGridView.setNumColumns(columnCount);
+    }
+
+    @NotNull
+    @Override
+    public AppCompatActivity getActivityFromView() {
+        return this;
+    }
+
+    @Override
+    public void notifyAdapterOfDataSetChange() {
+        mAdapter.notifyDataSetChanged();
+    }
+
     private AlertDialog buildServerUrlChangeDialog(String serverUrl) {
         final String[] url = {serverUrl};
         AlertDialog.Builder builder = new AlertDialog.Builder(TransferActivity.this);
@@ -391,10 +335,5 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
             }
         });
         return builder.create();
-    }
-
-    @Override
-    public void loadAdRequest(@NotNull AdRequest adRequest) {
-        mAdView.loadAd(adRequest);
     }
 }

@@ -70,7 +70,6 @@ public class SplashActivity extends AppCompatActivity {
                             if (value.toLowerCase().contains("transfer.sh")) {
                                 Potato.potate(SplashActivity.this).Preferences().putSharedPreference(PREF_URL_FLAG, serverURL);
 
-
                                 if (setupProgressBar.isShown()) {
                                     setupProgressBar.setVisibility(View.GONE);
                                     readyButton.setVisibility(View.VISIBLE);

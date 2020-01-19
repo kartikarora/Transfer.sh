@@ -15,5 +15,5 @@
     limitations under the License.
 -->
 <resources>
-    <integer name="col_count">3</integer>
+    <integer name="column_count">3</integer>
 </resources>

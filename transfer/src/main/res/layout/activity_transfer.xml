@@ -41,7 +41,7 @@
             android:layout_height="match_parent"
             android:layout_below="@id/banner_ad_view"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
-            android:numColumns="@integer/col_count" />
+            android:numColumns="@integer/column_count" />
 
         <TextView
             android:id="@+id/no_files_text_view"
