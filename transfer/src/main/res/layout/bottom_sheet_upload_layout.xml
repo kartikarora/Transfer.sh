@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bottom_sheet"
@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:elevation="8dp"
     app:behavior_hideable="true"
-    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
 
     <TextView
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toBottomOf="@id/uploading_file_text_view"
         tools:text="@tools:sample/lorem" />
 
-    <android.support.v4.widget.ContentLoadingProgressBar
+    <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/file_upload_progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
@@ -48,4 +48,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,7 +21,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import me.kartikarora.transfersh.contracts.FilesContract;
 import me.kartikarora.transfersh.helpers.FilesDBHelper;
