@@ -39,6 +39,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,6 +75,7 @@ import me.kartikarora.transfersh.applications.TransferApplication;
 import me.kartikarora.transfersh.contracts.FilesContract;
 import me.kartikarora.transfersh.custom.CountingTypedFile;
 import me.kartikarora.transfersh.helpers.UtilsHelper;
+import me.kartikarora.transfersh.network.NetworkResponseListener;
 import me.kartikarora.transfersh.network.TransferClient;
 import retrofit.ResponseCallback;
 import retrofit.RetrofitError;
@@ -104,6 +106,10 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     private ConstraintLayout mUploadBottomSheet;
     private BottomSheetBehavior<ConstraintLayout> mUploadBottomSheetBehavior;
     private FloatingActionButton mUploadFileButton;
+    private TextView mNameTextView;
+    private TextView mPercentTextView;
+    private ContentLoadingProgressBar mProgressBar;
+    private NetworkResponseListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +123,9 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         mCoordinatorLayout = findViewById(R.id.coordinator_layout);
         mAdView = findViewById(R.id.banner_ad_view);
         mUploadBottomSheet = findViewById(R.id.bottom_sheet);
+        mNameTextView = mUploadBottomSheet.findViewById(R.id.uploading_file_text_view);
+        mPercentTextView = mUploadBottomSheet.findViewById(R.id.uploading_percent_text_view);
+        mProgressBar = mUploadBottomSheet.findViewById(R.id.file_upload_progress_bar);
         mUploadBottomSheetBehavior = BottomSheetBehavior.from(mUploadBottomSheet);
         mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
@@ -161,7 +170,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILE_RESULT_CODE && resultCode == RESULT_OK) {
             try {
-                uploadFile(data.getData());
+                initiateFileUploadFromUri(data.getData());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -177,7 +186,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         if (Intent.ACTION_SEND.equals(action)) {
             Uri dataUri = getIntent().getParcelableExtra(Intent.EXTRA_STREAM);
             try {
-                uploadFile(dataUri);
+                initiateFileUploadFromUri(dataUri);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -185,7 +194,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             ArrayList<Uri> dataUris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
             for (Uri uri : dataUris) {
                 try {
-                    uploadFile(uri);
+                    initiateFileUploadFromUri(uri);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -198,7 +207,7 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                     while (cursor.moveToNext()) {
                         Uri uri = Uri.parse(getString(cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_URI)));
                         try {
-                            uploadFile(uri);
+                            initiateFileUploadFromUri(uri);
                             getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
                                     new String[]{String.valueOf(id)});
                             mAdapter.notifyDataSetChanged();
@@ -218,100 +227,165 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
     }
 
-    private void uploadFile(final Uri uri) throws IOException {
+    private void initiateFileUploadFromUri(final Uri uri) throws IOException {
 
         mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        TextView nameTextView = mUploadBottomSheet.findViewById(R.id.uploading_file_text_view);
-        final TextView percentTextView = mUploadBottomSheet.findViewById(R.id.uploading_percent_text_view);
-        final ContentLoadingProgressBar progressBar = mUploadBottomSheet.findViewById(R.id.file_upload_progress_bar);
 
+        final File fileToUpload = getFileFromUri(uri);
+        final String name = fileToUpload.getName();
+        final String mimeType = getContentResolver().getType(uri);
+        mNameTextView.setText(getString(R.string.uploading_file, name));
+
+        MultipartTypedOutput multipartTypedOutput = getMultipartDataFromFile(fileToUpload, mimeType);
+
+        uploadFileToRemoteServerAndGetResponse(multipartTypedOutput, name);
+
+        listener = new NetworkResponseListener() {
+            @Override
+            public void onSuccess(final String url) {
+                addFileDetailsToDatabaseAndDeleteTemporaryFile(fileToUpload, uri, mimeType, url);
+                Snackbar.make(mCoordinatorLayout, name + " " + getString(R.string.uploaded), Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.share, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Share : " + url);
+                                startActivity(new Intent()
+                                        .setAction(Intent.ACTION_SEND)
+                                        .putExtra(Intent.EXTRA_TEXT, url)
+                                        .setType("text/plain")
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                            }
+                        }).show();
+                mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+
+            @Override
+            public void onFailure(Response response) {
+                Log.e("Error", response.getReason());
+                mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+            }
+        };
+    }
+
+    private File getFileFromUri(Uri uri) {
+        File file = null;
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
             int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
             final String name = cursor.getString(nameIndex);
-            final String mimeType = getContentResolver().getType(uri);
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            OutputStream outputStream = openFileOutput(name, MODE_PRIVATE);
-            if (inputStream != null) {
-                IOUtils.copy(inputStream, outputStream);
-                final File file = new File(getFilesDir(), name);
-                nameTextView.setText(getString(R.string.uploading_file, name));
-                MultipartTypedOutput multipartTypedOutput = new MultipartTypedOutput();
-                multipartTypedOutput.addPart(name, new CountingTypedFile(mimeType, file, new CountingTypedFile.FileUploadListener() {
-                    @Override
-                    public void uploaded(long num) {
-                        int per = Math.round((num / (float) file.length()) * 100);
-                        percentTextView.setText(per + "%");
-                        progressBar.setProgress(per);
-                    }
-                }));
-                String baseUrl = Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceString(PREF_URL_FLAG);
-                TransferClient.getInterface(baseUrl).uploadFile(multipartTypedOutput, name, new ResponseCallback() {
-                    @Override
-                    public void success(Response response) {
-                        BufferedReader reader;
-                        StringBuilder sb = new StringBuilder();
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                OutputStream outputStream = openFileOutput(name, MODE_PRIVATE);
+                if (inputStream != null) {
+                    IOUtils.copy(inputStream, outputStream);
+                    file = new File(getFilesDir(), name);
+                } /*else {
+                Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
+            }*/
+                cursor.close();
+            } /*else {
+            Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
+        }*/ catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return file;
+    }
+
+    private MultipartTypedOutput getMultipartDataFromFile(final File fileToUpload, String mimeType) {
+        MultipartTypedOutput multipartTypedOutput = new MultipartTypedOutput();
+        multipartTypedOutput.addPart(fileToUpload.getName(), new CountingTypedFile(mimeType, fileToUpload, new CountingTypedFile.FileUploadListener() {
+            @Override
+            public void uploaded(long num) {
+                int per = Math.round((num / (float) fileToUpload.length()) * 100);
+                mPercentTextView.setText(per + "%");
+                mProgressBar.setProgress(per);
+            }
+        }));
+        return multipartTypedOutput;
+    }
+
+    private void uploadFileToRemoteServerAndGetResponse(final MultipartTypedOutput multipartTypedOutput, final String name) {
+        final String baseUrl = Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceString(PREF_URL_FLAG);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Response response = TransferClient.getInterface(baseUrl).uploadFile(multipartTypedOutput, name);
+                if (response.getStatus() == 200) {
+                    BufferedReader reader;
+                    StringBuilder sb = new StringBuilder();
+                    try {
+                        reader = new BufferedReader(new InputStreamReader(response.getBody().in()));
+                        String line;
                         try {
-                            reader = new BufferedReader(new InputStreamReader(response.getBody().in()));
-                            String line;
-                            try {
-                                while ((line = reader.readLine()) != null) {
-                                    sb.append(line);
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            while ((line = reader.readLine()) != null) {
+                                sb.append(line);
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        final String result = sb.toString();
-                        Snackbar.make(mCoordinatorLayout, name + " " + getString(R.string.uploaded), Snackbar.LENGTH_INDEFINITE)
-                                .setAction(R.string.share, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Share : " + result);
-                                        startActivity(new Intent()
-                                                .setAction(Intent.ACTION_SEND)
-                                                .putExtra(Intent.EXTRA_TEXT, result)
-                                                .setType("text/plain")
-                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                                    }
-                                }).show();
-
-                        SimpleDateFormat sdf = UtilsHelper.getInstance().getSdf();
-                        Calendar upCal = Calendar.getInstance();
-                        upCal.setTime(new Date(file.lastModified()));
-                        Calendar delCal = Calendar.getInstance();
-                        delCal.setTime(upCal.getTime());
-                        delCal.add(Calendar.DATE, 14);
-                        ContentValues values = new ContentValues();
-                        values.put(FilesContract.FilesEntry.COLUMN_NAME, name);
-                        values.put(FilesContract.FilesEntry.COLUMN_TYPE, mimeType);
-                        values.put(FilesContract.FilesEntry.COLUMN_URL, result);
-                        values.put(FilesContract.FilesEntry.COLUMN_URI, uri.toString());
-                        values.put(FilesContract.FilesEntry.COLUMN_SIZE, String.valueOf(file.getTotalSpace()));
-                        values.put(FilesContract.FilesEntry.COLUMN_DATE_UPLOAD, sdf.format(upCal.getTime()));
-                        values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
-                        getContentResolver().insert(FilesContract.BASE_CONTENT_URI, values);
-                        FileUtils.deleteQuietly(file);
-                        mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-
-                    @Override
-                    public void failure(RetrofitError error) {
-                        error.printStackTrace();
-                        mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                        Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
-                    }
-                });
-            } else {
-                Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
+                    String url = sb.toString();
+                    listener.onSuccess(url);
+                } else {
+                    listener.onFailure(response);
+                }
             }
-            cursor.close();
-        } else {
-            Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
-        }
+        }).start();
+
+
+       /* TransferClient.getInterface(baseUrl).uploadFile(multipartTypedOutput, name, new ResponseCallback() {
+            @Override
+            public void success(Response response) {
+                BufferedReader reader;
+                StringBuilder sb = new StringBuilder();
+                try {
+                    reader = new BufferedReader(new InputStreamReader(response.getBody().in()));
+                    String line;
+                    try {
+                        while ((line = reader.readLine()) != null) {
+                            sb.append(line);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                final String url = sb.toString();
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                error.printStackTrace();
+                mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+            }
+        });*/
+    }
+
+    private void addFileDetailsToDatabaseAndDeleteTemporaryFile(File file, Uri uri, String mimeType, String result) {
+        SimpleDateFormat sdf = UtilsHelper.getInstance().getSdf();
+        Calendar upCal = Calendar.getInstance();
+        upCal.setTime(new Date(file.lastModified()));
+        Calendar delCal = Calendar.getInstance();
+        delCal.setTime(upCal.getTime());
+        delCal.add(Calendar.DATE, 14);
+        ContentValues values = new ContentValues();
+        values.put(FilesContract.FilesEntry.COLUMN_NAME, file.getName());
+        values.put(FilesContract.FilesEntry.COLUMN_TYPE, mimeType);
+        values.put(FilesContract.FilesEntry.COLUMN_URL, result);
+        values.put(FilesContract.FilesEntry.COLUMN_URI, uri.toString());
+        values.put(FilesContract.FilesEntry.COLUMN_SIZE, String.valueOf(file.getTotalSpace()));
+        values.put(FilesContract.FilesEntry.COLUMN_DATE_UPLOAD, sdf.format(upCal.getTime()));
+        values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
+        getContentResolver().insert(FilesContract.BASE_CONTENT_URI, values);
+        FileUtils.deleteQuietly(file);
     }
 
     @Override
@@ -335,7 +409,8 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == FileGridAdapter.PERM_REQUEST_CODE && grantResults.length > 0) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
