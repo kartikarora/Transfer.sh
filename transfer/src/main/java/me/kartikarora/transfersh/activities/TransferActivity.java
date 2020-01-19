@@ -16,30 +16,18 @@
 
 package me.kartikarora.transfersh.activities;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
-import androidx.core.widget.ContentLoadingProgressBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,23 +37,27 @@ import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.Objects;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.widget.ContentLoadingProgressBar;
 import me.kartikarora.potato.Potato;
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
@@ -73,17 +65,10 @@ import me.kartikarora.transfersh.actions.IntentAction;
 import me.kartikarora.transfersh.adapters.FileGridAdapter;
 import me.kartikarora.transfersh.applications.TransferApplication;
 import me.kartikarora.transfersh.contracts.FilesContract;
-import me.kartikarora.transfersh.custom.CountingTypedFile;
+import me.kartikarora.transfersh.contracts.TransferActivityContract;
 import me.kartikarora.transfersh.helpers.UtilsHelper;
 import me.kartikarora.transfersh.network.NetworkResponseListener;
-import me.kartikarora.transfersh.network.TransferClient;
-import retrofit.ResponseCallback;
-import retrofit.RetrofitError;
-import retrofit.client.Header;
-import retrofit.client.Response;
-import retrofit.mime.MultipartTypedOutput;
-
-import static me.kartikarora.transfersh.activities.SplashActivity.PREF_URL_FLAG;
+import me.kartikarora.transfersh.presenter.TransferActivityPresenter;
 
 /**
  * Developer: chipset
@@ -91,7 +76,7 @@ import static me.kartikarora.transfersh.activities.SplashActivity.PREF_URL_FLAG;
  * Project : Transfer.sh
  * Date : 9/6/16
  */
-public class TransferActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class TransferActivity extends AppCompatActivity implements TransferActivityContract.View {
 
     private static final int FILE_RESULT_CODE = BuildConfig.VERSION_CODE / 10000;
     private static final String PREF_GRID_VIEW_FLAG = "gridFlag";
@@ -109,7 +94,10 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     private TextView mNameTextView;
     private TextView mPercentTextView;
     private ContentLoadingProgressBar mProgressBar;
-    private NetworkResponseListener listener;
+    private NetworkResponseListener mListener;
+    private ProgressDialog pleaseWaitDialog;
+    private AlertDialog serverUrlChangeDialog;
+    private TransferActivityContract.Presenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +105,12 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer);
 
+        mPresenter = new TransferActivityPresenter(this);
+        mPresenter.requestDataFromLoader();
+    }
+
+    @Override
+    public void initView() {
         mNoFilesTextView = findViewById(R.id.no_files_text_view);
         mFileItemsGridView = findViewById(R.id.file_grid_view);
         mUploadFileButton = findViewById(R.id.upload_file_fab);
@@ -128,26 +122,17 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         mProgressBar = mUploadBottomSheet.findViewById(R.id.file_upload_progress_bar);
         mUploadBottomSheetBehavior = BottomSheetBehavior.from(mUploadBottomSheet);
         mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
 
-        if (mUploadFileButton != null) {
-            mUploadFileButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.setType("*/*");
-                    startActivityForResult(intent, FILE_RESULT_CODE);
-                }
-            });
-        }
-
-        getSupportLoaderManager().initLoader(BuildConfig.VERSION_CODE, null, this);
+    @Override
+    public void loadDataFromLoader() {
+        getSupportLoaderManager().initLoader(BuildConfig.VERSION_CODE, null, mPresenter.getLoaderCallbacks());
         TransferApplication application = (TransferApplication) getApplication();
         mFirebaseAnalytics = application.getDefaultTracker();
 
         UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Activity : " + this.getClass().getSimpleName(), "Launched");
 
         showAsGrid = Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceBoolean(PREF_GRID_VIEW_FLAG);
-
         mUploadBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -169,35 +154,22 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILE_RESULT_CODE && resultCode == RESULT_OK) {
-            try {
-                initiateFileUploadFromUri(data.getData());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mPresenter.initiateFileUploadFromUri(Objects.requireNonNull(data.getData()));
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        mPresenter.buildAdRequest();
         String action = getIntent().getAction();
         if (Intent.ACTION_SEND.equals(action)) {
             Uri dataUri = getIntent().getParcelableExtra(Intent.EXTRA_STREAM);
-            try {
-                initiateFileUploadFromUri(dataUri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mPresenter.initiateFileUploadFromUri(Objects.requireNonNull(dataUri));
         } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
             ArrayList<Uri> dataUris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-            for (Uri uri : dataUris) {
-                try {
-                    initiateFileUploadFromUri(uri);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            for (Uri uri : Objects.requireNonNull(dataUris)) {
+                mPresenter.initiateFileUploadFromUri(uri);
             }
         } else if (IntentAction.ACTION_REUPLOAD.equals(action)) {
             long id = getIntent().getLongExtra("file_id", -1);
@@ -206,14 +178,10 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
                         Uri uri = Uri.parse(getString(cursor.getColumnIndex(FilesContract.FilesEntry.COLUMN_URI)));
-                        try {
-                            initiateFileUploadFromUri(uri);
-                            getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
-                                    new String[]{String.valueOf(id)});
-                            mAdapter.notifyDataSetChanged();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        mPresenter.initiateFileUploadFromUri(uri);
+                        getContentResolver().delete(FilesContract.BASE_CONTENT_URI, FilesContract.FilesEntry._ID + "=?",
+                                new String[]{String.valueOf(id)});
+                        mAdapter.notifyDataSetChanged();
                     }
                     cursor.close();
                 }
@@ -227,147 +195,6 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
 
     }
 
-    private void initiateFileUploadFromUri(final Uri uri) throws IOException {
-
-        mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-
-        final File fileToUpload = getFileFromUri(uri);
-        final String name = fileToUpload.getName();
-        final String mimeType = getContentResolver().getType(uri);
-        mNameTextView.setText(getString(R.string.uploading_file, name));
-
-        MultipartTypedOutput multipartTypedOutput = getMultipartDataFromFile(fileToUpload, mimeType);
-
-        uploadFileToRemoteServerAndGetResponse(multipartTypedOutput, name);
-
-        listener = new NetworkResponseListener() {
-            @Override
-            public void onSuccess(final String url) {
-                addFileDetailsToDatabaseAndDeleteTemporaryFile(fileToUpload, uri, mimeType, url);
-                Snackbar.make(mCoordinatorLayout, name + " " + getString(R.string.uploaded), Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.share, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Share : " + url);
-                                startActivity(new Intent()
-                                        .setAction(Intent.ACTION_SEND)
-                                        .putExtra(Intent.EXTRA_TEXT, url)
-                                        .setType("text/plain")
-                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                            }
-                        }).show();
-                mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            }
-
-            @Override
-            public void onFailure(Response response) {
-                Log.e("Error", response.getReason());
-                mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
-            }
-        };
-    }
-
-    private File getFileFromUri(Uri uri) {
-        File file = null;
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-            final String name = cursor.getString(nameIndex);
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                OutputStream outputStream = openFileOutput(name, MODE_PRIVATE);
-                if (inputStream != null) {
-                    IOUtils.copy(inputStream, outputStream);
-                    file = new File(getFilesDir(), name);
-                } /*else {
-                Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
-            }*/
-                cursor.close();
-            } /*else {
-            Snackbar.make(mCoordinatorLayout, R.string.unable_to_read, Snackbar.LENGTH_SHORT).show();
-        }*/ catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return file;
-    }
-
-    private MultipartTypedOutput getMultipartDataFromFile(final File fileToUpload, String mimeType) {
-        MultipartTypedOutput multipartTypedOutput = new MultipartTypedOutput();
-        multipartTypedOutput.addPart(fileToUpload.getName(), new CountingTypedFile(mimeType, fileToUpload, new CountingTypedFile.FileUploadListener() {
-            @Override
-            public void uploaded(long num) {
-                int per = Math.round((num / (float) fileToUpload.length()) * 100);
-                mPercentTextView.setText(per + "%");
-                mProgressBar.setProgress(per);
-            }
-        }));
-        return multipartTypedOutput;
-    }
-
-    private void uploadFileToRemoteServerAndGetResponse(final MultipartTypedOutput multipartTypedOutput, final String name) {
-        final String baseUrl = Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceString(PREF_URL_FLAG);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Response response = TransferClient.getInterface(baseUrl).uploadFile(multipartTypedOutput, name);
-                if (response.getStatus() == 200) {
-                    BufferedReader reader;
-                    StringBuilder sb = new StringBuilder();
-                    try {
-                        reader = new BufferedReader(new InputStreamReader(response.getBody().in()));
-                        String line;
-                        try {
-                            while ((line = reader.readLine()) != null) {
-                                sb.append(line);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    String url = sb.toString();
-                    listener.onSuccess(url);
-                } else {
-                    listener.onFailure(response);
-                }
-            }
-        }).start();
-
-
-       /* TransferClient.getInterface(baseUrl).uploadFile(multipartTypedOutput, name, new ResponseCallback() {
-            @Override
-            public void success(Response response) {
-                BufferedReader reader;
-                StringBuilder sb = new StringBuilder();
-                try {
-                    reader = new BufferedReader(new InputStreamReader(response.getBody().in()));
-                    String line;
-                    try {
-                        while ((line = reader.readLine()) != null) {
-                            sb.append(line);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                final String url = sb.toString();
-
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                error.printStackTrace();
-                mUploadBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                Snackbar.make(mCoordinatorLayout, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
-            }
-        });*/
-    }
 
     private void addFileDetailsToDatabaseAndDeleteTemporaryFile(File file, Uri uri, String mimeType, String result) {
         SimpleDateFormat sdf = UtilsHelper.getInstance().getSdf();
@@ -386,26 +213,6 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         values.put(FilesContract.FilesEntry.COLUMN_DATE_DELETE, sdf.format(delCal.getTime()));
         getContentResolver().insert(FilesContract.BASE_CONTENT_URI, values);
         FileUtils.deleteQuietly(file);
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this, FilesContract.BASE_CONTENT_URI, null, null, null, null);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
-        mData = data;
-        display(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mFileItemsGridView.setVisibility(View.VISIBLE);
-        mNoFilesTextView.setVisibility(View.GONE);
-        mAdapter.swapCursor(null);
-        mData = null;
     }
 
     @Override
@@ -439,14 +246,25 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
             Potato.potate(TransferActivity.this).Preferences().putSharedPreference(PREF_GRID_VIEW_FLAG, false);
             mFileItemsGridView.setNumColumns(1);
         } else if (item.getItemId() == R.id.action_set_server_url) {
-            setServerUrl(getString(R.string.setup_url), getString(R.string.setup_url_message_change, getString(android.R.string.cancel)));
+            mPresenter.initiateServerUrlChange();
         }
         invalidateOptionsMenu();
-        display(mData);
+        initGrid(mData);
         return super.onOptionsItemSelected(item);
     }
 
-    private void display(Cursor data) {
+    @Override
+    public void initGrid(Cursor data) {
+        if (mUploadFileButton != null) {
+            mUploadFileButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.setType("*/*");
+                    startActivityForResult(intent, FILE_RESULT_CODE);
+                }
+            });
+        }
         mAdapter = new FileGridAdapter(TransferActivity.this, data, mFirebaseAnalytics, showAsGrid);
         if (showAsGrid) {
             mFileItemsGridView.setNumColumns(getResources().getInteger(R.integer.col_count));
@@ -464,74 +282,119 @@ public class TransferActivity extends AppCompatActivity implements LoaderManager
         }
     }
 
-    private void setServerUrl(String title, String message) {
-        final String[] serverURL = {Potato.potate(TransferActivity.this).Preferences().getSharedPreferenceString(PREF_URL_FLAG)};
-        AlertDialog.Builder builder = new AlertDialog.Builder(TransferActivity.this);
-        builder.setTitle(title);
-        builder.setMessage(message);
+    @Override
+    public void resetGrid() {
+        mFileItemsGridView.setVisibility(View.VISIBLE);
+        mNoFilesTextView.setVisibility(View.GONE);
+        mAdapter.swapCursor(null);
+        mData = null;
+    }
 
+    @Override
+    public void showSnackbar(@NotNull String text) {
+        Snackbar.make(mCoordinatorLayout, text, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showSnackbar(int textResource) {
+        Snackbar.make(mCoordinatorLayout, getString(textResource), Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showSnackbarWithAction(@NotNull String name, @NotNull final String shareableUrl) {
+        Snackbar.make(mCoordinatorLayout, name + getString(R.string.uploaded), Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.share, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        UtilsHelper.getInstance().trackEvent(mFirebaseAnalytics, "Action", "Share : " + shareableUrl);
+                        startActivity(new Intent()
+                                .setAction(Intent.ACTION_SEND)
+                                .putExtra(Intent.EXTRA_TEXT, shareableUrl)
+                                .setType("text/plain")
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                    }
+                }).show();
+    }
+
+    @Override
+    public void setBottomSheetState(int state) {
+        mUploadBottomSheetBehavior.setState(state);
+    }
+
+    @Override
+    public void setUploadingFileNameInBottomSheet(@Nullable String text) {
+        mNameTextView.setText(text);
+    }
+
+    @Override
+    public void setUploadProgressPercentage(int percentage) {
+        mPercentTextView.setText(percentage + "%");
+        mProgressBar.setProgress(percentage);
+    }
+
+    @Override
+    public void showPleaseWaitDialog() {
+        pleaseWaitDialog = new ProgressDialog(this);
+        pleaseWaitDialog.setMessage(getString(R.string.please_wait));
+        pleaseWaitDialog.show();
+    }
+
+    @Override
+    public void hidePleaseWaitDialog() {
+        if (pleaseWaitDialog.isShowing()) {
+            pleaseWaitDialog.cancel();
+            pleaseWaitDialog.dismiss();
+        }
+    }
+
+    @NotNull
+    @Override
+    public Context getContextFromView() {
+        return this.getApplicationContext();
+    }
+
+    @Override
+    public void showServerUrlChangeAlertDialog(@NotNull String serverUrl) {
+        serverUrlChangeDialog = buildServerUrlChangeDialog(serverUrl);
+        serverUrlChangeDialog.show();
+    }
+
+    @Override
+    public void hideServerUrlChangeAlertDialog() {
+        serverUrlChangeDialog.cancel();
+    }
+
+    private AlertDialog buildServerUrlChangeDialog(String serverUrl) {
+        final String[] url = {serverUrl};
+        AlertDialog.Builder builder = new AlertDialog.Builder(TransferActivity.this);
+        builder.setTitle(getString(R.string.server_error));
+        builder.setMessage(getString(R.string.server_error_message, serverUrl));
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-        input.setHint(serverURL[0]);
+        input.setHint(url[0]);
         builder.setView(input);
 
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                serverURL[0] = input.getText().toString();
-                if (TextUtils.isEmpty(serverURL[0])) {
-                    serverURL[0] = "https://transfer.sh";
+                url[0] = input.getText().toString();
+                if (TextUtils.isEmpty(url[0])) {
+                    url[0] = "https://transfer.sh";
                 }
-                beginCheck(serverURL[0]);
+                mPresenter.checkIfServerIsResponsive(url[0]);
             }
-        });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                beginCheck(serverURL[0]);
+                mPresenter.checkIfServerIsResponsive(url[0]);
             }
         });
-        builder.show();
+        return builder.create();
     }
 
-    private void beginCheck(final String serverURL) {
-        final ProgressDialog dialog = new ProgressDialog(TransferActivity.this);
-        dialog.setMessage(getString(R.string.please_wait));
-        dialog.show();
-
-        TransferClient.nullifyClient();
-        TransferClient.getInterface(serverURL).pingServer(new ResponseCallback() {
-            @Override
-            public void success(Response response) {
-                if (response.getStatus() == 200) {
-                    List<Header> headerList = response.getHeaders();
-                    for (Header header : headerList) {
-                        if (!TextUtils.isEmpty(header.getName()) && header.getName().equalsIgnoreCase("server")) {
-                            String value = header.getValue();
-                            if (value.toLowerCase().contains("transfer.sh")) {
-                                Potato.potate(TransferActivity.this).Preferences().putSharedPreference(PREF_URL_FLAG, serverURL);
-                                if (dialog.isShowing()) {
-                                    dialog.cancel();
-                                    dialog.dismiss();
-                                }
-                            } else {
-                                setServerUrl(getString(R.string.server_error), getString(R.string.server_error_message, serverURL));
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                error.printStackTrace();
-                if (dialog.isShowing()) {
-                    dialog.cancel();
-                    dialog.dismiss();
-                }
-                setServerUrl(getString(R.string.server_error), getString(R.string.server_error_message, serverURL));
-            }
-        });
+    @Override
+    public void loadAdRequest(@NotNull AdRequest adRequest) {
+        mAdView.loadAd(adRequest);
     }
 }

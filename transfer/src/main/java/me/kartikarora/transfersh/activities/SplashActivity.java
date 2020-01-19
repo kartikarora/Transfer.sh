@@ -58,7 +58,6 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void beginCheck() {
-        TransferClient.nullifyClient();
         TransferClient.getInterface(serverURL).pingServer(new ResponseCallback() {
             @Override
             public void success(Response response) {

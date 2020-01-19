@@ -49,14 +49,7 @@ public class TransferClient {
         @PUT("/{name}")
         void uploadFile(@Body MultipartTypedOutput typedFile, @Path("name") String name, ResponseCallback callback);
 
-        @PUT(("/{name}"))
-        Response uploadFile(@Body MultipartTypedOutput typedFile, @Path("name") String name);
-
         @GET("/")
         void pingServer(ResponseCallback callback);
-    }
-
-    public static void nullifyClient() {
-        transferInterface = null;
     }
 }
