@@ -32,7 +32,14 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class TransferActivityModel(private val context: Context) : TransferActivityContract.Model {
+class TransferActivityModel : TransferActivityContract.Model {
+
+    private lateinit var context: Context
+
+    fun injectContext(context: Context) {
+        this.context = context
+    }
+
 
     override fun pingServerForResponse(serverUrl: String, listener: NetworkResponseListener) {
 

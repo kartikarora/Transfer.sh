@@ -41,7 +41,8 @@ public class TransferActivityPresenter(view: TransferActivityContract.View)
     private val mView: TransferActivityContract.View = view
 
     init {
-        mModel = TransferActivityModel(mView.getContextFromView())
+        mModel = TransferActivityModel()
+        mModel.injectContext(mView.getContextFromView())
         mView.initView()
     }
 
