@@ -13,6 +13,7 @@ import me.kartikarora.transfersh.adapters.FileGridAdapter
 import me.kartikarora.transfersh.applications.TransferApplication
 import me.kartikarora.transfersh.custom.CountingTypedFile
 import me.kartikarora.transfersh.network.NetworkResponseListener
+import retrofit.client.Response
 import retrofit.mime.MultipartTypedOutput
 import java.io.File
 
@@ -48,7 +49,7 @@ class TransferActivityContract {
     }
 
     interface Model {
-        fun pingServerForResponse(serverUrl: String, listener: NetworkResponseListener)
+        fun pingServerForResponse(baseUrl: String, listener: NetworkResponseListener)
         fun getFileFromContentResolverUsingUri(uri: Uri): File
         fun getMimeTypeOfFileUsingUriFromContentResolver(uri: Uri): String
         fun createMultipartDataFromFileToUpload(fileToUpload: File, mimeType: String,
@@ -66,6 +67,8 @@ class TransferActivityContract {
         fun saveUploadedFileMetaToDatabase(uploadedFile: File, shareableUrl: String, uriInContentResolver: Uri)
         fun fireIntent(intent: Intent)
         fun getUriFromFileIdToReuploadFile(id: Long): Uri
+        fun getShareableUrlFromResponse(response: Response): String
+        fun getPercentageFromValue(value: Long, max: Long): Int
     }
 
     interface Presenter {

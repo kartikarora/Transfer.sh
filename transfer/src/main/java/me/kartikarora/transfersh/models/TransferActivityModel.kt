@@ -24,10 +24,7 @@ import retrofit.ResponseCallback
 import retrofit.RetrofitError
 import retrofit.client.Response
 import retrofit.mime.MultipartTypedOutput
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -40,10 +37,8 @@ class TransferActivityModel : TransferActivityContract.Model {
         this.context = context
     }
 
-
-    override fun pingServerForResponse(serverUrl: String, listener: NetworkResponseListener) {
-
-        TransferClient.getInterface(serverUrl).pingServer(object : ResponseCallback() {
+    override fun pingServerForResponse(baseUrl: String, listener: NetworkResponseListener) {
+        TransferClient.getInterface(baseUrl).pingServer(object : ResponseCallback() {
             override fun success(response: Response) {
                 listener.success(response)
             }
@@ -53,6 +48,11 @@ class TransferActivityModel : TransferActivityContract.Model {
                 listener.failure(error)
             }
         })
+    }
+
+    fun pingServerForResponseTest(baseUrl: String): Response {
+        return TransferClient.getInterface(baseUrl).pingServerTest()
+
     }
 
     override fun getFileFromContentResolverUsingUri(uri: Uri): File {
@@ -102,6 +102,12 @@ class TransferActivityModel : TransferActivityContract.Model {
                     }
                 }
         )
+    }
+
+    fun uploadMultipartTypedOutputToRemoteServerTest(baseUrl: String, name: String,
+                                                     multipartTypedOutput: MultipartTypedOutput): Response {
+        return TransferClient.getInterface(baseUrl).uploadFileTest(multipartTypedOutput, name)
+
     }
 
     override fun storeStringInPreference(key: String, value: String) {
@@ -158,5 +164,28 @@ class TransferActivityModel : TransferActivityContract.Model {
             cursor.close()
         }
         return uri
+    }
+
+    override fun getShareableUrlFromResponse(response: Response): String {
+        val reader: BufferedReader
+        val sb = StringBuilder()
+        try {
+            reader = BufferedReader(InputStreamReader(response.body.`in`()))
+            var line: String?
+            try {
+                while (reader.readLine().also { line = it } != null) {
+                    sb.append(line)
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return sb.toString()
+    }
+
+    override fun getPercentageFromValue(value: Long, max: Long): Int {
+        return (value / max * 100).toInt()
     }
 }

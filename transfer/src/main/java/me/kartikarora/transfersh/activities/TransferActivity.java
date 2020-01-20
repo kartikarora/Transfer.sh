@@ -336,4 +336,8 @@ public class TransferActivity extends AppCompatActivity implements TransferActiv
         });
         return builder.create();
     }
+
+    public int getColumnCount() {
+        return mFileItemsGridView.getNumColumns();
+    }
 }

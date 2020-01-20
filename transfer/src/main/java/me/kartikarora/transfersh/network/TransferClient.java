@@ -49,7 +49,13 @@ public class TransferClient {
         @PUT("/{name}")
         void uploadFile(@Body MultipartTypedOutput typedFile, @Path("name") String name, ResponseCallback callback);
 
+        @PUT("/{name}")
+        Response uploadFileTest(@Body MultipartTypedOutput typedFile, @Path("name") String name);
+
         @GET("/")
         void pingServer(ResponseCallback callback);
+
+        @GET("/")
+        Response pingServerTest();
     }
 }

@@ -19,7 +19,6 @@ package me.kartikarora.transfersh.applications;
 import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
-import com.facebook.stetho.Stetho;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -42,7 +41,6 @@ public class TransferApplication extends Application {
 
         MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
         UtilsHelper.getInstance().scheduleServiceJob(TransferApplication.this);
-        Stetho.initializeWithDefaults(this);
 
         final Fabric fabric = new Fabric.Builder(this)
                 .kits(new Crashlytics())

@@ -26,12 +26,8 @@ import me.kartikarora.transfersh.models.TransferActivityModel
 import me.kartikarora.transfersh.network.NetworkResponseListener
 import retrofit.RetrofitError
 import retrofit.client.Response
-import java.io.BufferedReader
 import java.io.File
-import java.io.IOException
-import java.io.InputStreamReader
 import java.util.*
-import kotlin.math.roundToInt
 
 
 public class TransferActivityPresenter(view: TransferActivityContract.View)
@@ -112,29 +108,14 @@ public class TransferActivityPresenter(view: TransferActivityContract.View)
         val mimeType: String = mModel.getMimeTypeOfFileUsingUriFromContentResolver(uri)
         val multipartTypedOutput = mModel.createMultipartDataFromFileToUpload(fileToUpload, mimeType,
                 CountingTypedFile.FileUploadListener {
-                    val percentage = (it / fileToUpload.length().toFloat() * 100).roundToInt()
+                    val percentage = mModel.getPercentageFromValue(it, fileToUpload.length())
                     mView.setUploadProgressPercentage(percentage)
                 })
         mView.setBottomSheetState(BottomSheetBehavior.STATE_EXPANDED)
         mModel.uploadMultipartTypedOutputToRemoteServer(baseUrl, name, multipartTypedOutput,
                 object : NetworkResponseListener {
                     override fun success(response: Response) {
-                        val reader: BufferedReader
-                        val sb = StringBuilder()
-                        try {
-                            reader = BufferedReader(InputStreamReader(response.body.`in`()))
-                            var line: String?
-                            try {
-                                while (reader.readLine().also { line = it } != null) {
-                                    sb.append(line)
-                                }
-                            } catch (e: IOException) {
-                                e.printStackTrace()
-                            }
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
-                        val shareableUrl = sb.toString()
+                        val shareableUrl = mModel.getShareableUrlFromResponse(response)
                         mModel.saveUploadedFileMetaToDatabase(fileToUpload, shareableUrl, uri)
                         mView.showSnackbarWithAction("$name.toString() $mView.getStringFromResource(R.string.uploaded)",
                                 R.string.share, Intent().setAction(Intent.ACTION_SEND)

@@ -6,8 +6,11 @@ import me.kartikarora.transfersh.models.TransferActivityModel
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-class BaseUnitTest {
+@RunWith(RobolectricTestRunner::class)
+class ContextBasedUnitTest {
 
     lateinit var context: Context
     lateinit var model: TransferActivityModel
