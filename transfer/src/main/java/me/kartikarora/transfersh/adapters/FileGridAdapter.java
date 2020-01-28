@@ -25,23 +25,23 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.widget.CursorAdapter;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.Locale;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.cursoradapter.widget.CursorAdapter;
 import me.kartikarora.transfersh.BuildConfig;
 import me.kartikarora.transfersh.R;
 import me.kartikarora.transfersh.contracts.FilesContract;
@@ -63,7 +63,7 @@ public class FileGridAdapter extends CursorAdapter {
     private FirebaseAnalytics mFirebaseAnalytics;
     private Boolean gridViewFlag;
 
-    public FileGridAdapter(AppCompatActivity activity, Cursor cursor, FirebaseAnalytics firebaseAnalytics, Boolean gridViewFlag) {
+    public FileGridAdapter(AppCompatActivity activity, Cursor cursor, FirebaseAnalytics firebaseAnalytics, boolean gridViewFlag) {
         super(activity.getApplicationContext(), cursor, false);
         this.context = activity.getApplicationContext();
         this.inflater = LayoutInflater.from(activity);

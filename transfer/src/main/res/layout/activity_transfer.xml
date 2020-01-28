@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -41,7 +41,7 @@
             android:layout_height="match_parent"
             android:layout_below="@id/banner_ad_view"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
-            android:numColumns="@integer/col_count" />
+            android:numColumns="@integer/column_count" />
 
         <TextView
             android:id="@+id/no_files_text_view"
@@ -55,7 +55,7 @@
 
     <include layout="@layout/bottom_sheet_upload_layout" />
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/upload_file_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,4 +68,4 @@
         app:layout_anchorGravity="top|end"
         app:srcCompat="@drawable/ic_file_upload"
         app:useCompatPadding="true" />
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

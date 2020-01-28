@@ -5,10 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
@@ -58,7 +58,6 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void beginCheck() {
-        TransferClient.nullifyClient();
         TransferClient.getInterface(serverURL).pingServer(new ResponseCallback() {
             @Override
             public void success(Response response) {
@@ -70,7 +69,6 @@ public class SplashActivity extends AppCompatActivity {
                             String value = header.getValue();
                             if (value.toLowerCase().contains("transfer.sh")) {
                                 Potato.potate(SplashActivity.this).Preferences().putSharedPreference(PREF_URL_FLAG, serverURL);
-
 
                                 if (setupProgressBar.isShown()) {
                                     setupProgressBar.setVisibility(View.GONE);

@@ -18,6 +18,7 @@ package me.kartikarora.transfersh.network;
 
 import retrofit.ResponseCallback;
 import retrofit.RestAdapter;
+import retrofit.client.Response;
 import retrofit.http.Body;
 import retrofit.http.GET;
 import retrofit.http.PUT;
@@ -48,11 +49,13 @@ public class TransferClient {
         @PUT("/{name}")
         void uploadFile(@Body MultipartTypedOutput typedFile, @Path("name") String name, ResponseCallback callback);
 
+        @PUT("/{name}")
+        Response uploadFileTest(@Body MultipartTypedOutput typedFile, @Path("name") String name);
+
         @GET("/")
         void pingServer(ResponseCallback callback);
-    }
 
-    public static void nullifyClient() {
-        transferInterface = null;
+        @GET("/")
+        Response pingServerTest();
     }
 }

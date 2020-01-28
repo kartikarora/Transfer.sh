@@ -16,14 +16,11 @@
 
 package me.kartikarora.transfersh.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
@@ -31,6 +28,10 @@ import android.widget.TextView;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.licenses.ApacheSoftwareLicense20;
 import de.psdev.licensesdialog.licenses.License;
@@ -49,6 +50,11 @@ import me.kartikarora.transfersh.helpers.UtilsHelper;
  * Date : 30/6/16
  */
 public class AboutActivity extends AppCompatActivity {
+
+    public static Intent createIntent(Context context) {
+        return new Intent(context, AboutActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
